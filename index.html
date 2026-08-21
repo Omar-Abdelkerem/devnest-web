@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- SEO -->
+    <title>DevNest — Your engineering work, in one place.</title>
+    <meta
+      name="description"
+      content="DevNest is a portfolio platform for engineers — show what you've built, get real feedback from peers, and build a permanent record of your technical work."
+    />
+
+    <!--
+      Inline script: apply dark/light class to <html> BEFORE the page renders.
+      This prevents the "flash of wrong theme" that would occur if we waited
+      for React to hydrate before applying the class.
+    -->
+    <script>
+      ;(function () {
+        var stored = localStorage.getItem('devnest-theme')
+        // Default to dark if nothing stored
+        if (stored !== 'light') {
+          document.documentElement.classList.add('dark')
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

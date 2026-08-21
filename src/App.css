@@ -1,0 +1,10 @@
+/*
+ * App.css — intentionally empty
+ *
+ * All styles are now handled by Tailwind utility classes applied directly
+ * in component JSX. This file is kept to avoid a broken import error in
+ * any tooling that expects it to exist, but it contains no rules.
+ *
+ * The old Vite boilerplate styles (counter button, hero layout, etc.)
+ * have been removed — they no longer apply to this project.
+ */

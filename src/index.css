@@ -1,0 +1,56 @@
+/*
+ * index.css — Global stylesheet for DevNest (Tailwind v4)
+ *
+ * Tailwind v4 changes how configuration works:
+ *   - Use `@import "tailwindcss"` instead of three @tailwind directives.
+ *   - Theme customization lives in CSS using `@theme`, not tailwind.config.js.
+ *   - Dark mode strategy is set via `@custom-variant dark` (class-based).
+ *
+ * This file is the single source of truth for design tokens, which means:
+ *   - Components reference Tailwind utilities (bg-accent, text-accent, etc.)
+ *   - The hex values only live here — not scattered in JSX.
+ */
+
+/* ── Google Fonts ─────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ── Tailwind v4 ──────────────────────────────────────────────────── */
+@import "tailwindcss";
+
+/*
+ * Dark mode strategy: class-based.
+ * Tailwind v4 uses `@custom-variant` to define this.
+ * The `dark` class must be on <html> — our useTheme hook manages this.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * @theme — Design token definitions for Tailwind v4.
+ *
+ * Anything defined here becomes a Tailwind utility class automatically:
+ *   --color-accent → bg-accent, text-accent, border-accent
+ *   --font-family-sans → font-sans
+ *   --font-family-mono → font-mono
+ *
+ * Accent color: deep desaturated teal extracted from the Figma screenshots.
+ * Using HSL for readability — 173° hue, 55% sat, 35% lightness.
+ * That lands at approximately #2a8a7e.
+ */
+@theme {
+  /* ── Colours ──────────────────────────────────────────────── */
+  --color-accent:       #2a8a7e;   /* deep desaturated teal — primary accent */
+  --color-accent-light: #34a899;   /* brighter — hover states */
+  --color-accent-dark:  #1e6b61;   /* darker — pressed/active states */
+
+  /* ── Typography ───────────────────────────────────────────── */
+  --font-family-sans: 'Inter', system-ui, sans-serif;
+  --font-family-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+}
+
+/*
+ * Global base: smooth scrolling, and ensure the page background fills
+ * the viewport in both themes.
+ */
+html {
+  scroll-behavior: smooth;
+}
