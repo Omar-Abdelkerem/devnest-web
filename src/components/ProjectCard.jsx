@@ -22,24 +22,37 @@
  * Props:
  *   All props have defaults matching the screenshot so it works out of the box.
  */
+/**
+ * ProjectCard.jsx — "Example Project" widget shown in the Hero right column
+ *
+ * This mimics a GitHub-style pinned repository card, as seen in the screenshot.
+ * It's intentionally self-contained so it could be reused in a future
+ * "portfolio grid" feature.
+ */
+import { Link } from 'react-router-dom'
 
 export default function ProjectCard({
-  repo        = 'maren-k/forge-cli',
+  repo = 'maren-k/forge-cli',
   description = 'A zero-config deployment tool for monorepos. Detects changed packages using a content-addressed cache…',
-  tags        = ['rust', 'cli', 'deployment'],
-  badges      = ['PINNED'],
-  language    = 'Rust',
+  tags = ['rust', 'cli', 'deployment'],
+  badges = ['PINNED'],
+  language = 'Rust',
   languageColor = '#dea584',
-  stars       = 847,
-  forks       = 62,
-  updatedAt   = '3 days ago',
+  stars = 847,
+  forks = 62,
+  updatedAt = '3 days ago',
 }) {
+  // Changed <article> to <Link> to make the whole card clickable
   return (
-    <article
+    <Link
+      to={`/project/${encodeURIComponent(repo)}`}
       className="
-        rounded-lg border p-4
+        block rounded-lg border p-4
         bg-white dark:bg-neutral-800
         border-gray-200 dark:border-neutral-700
+        hover:border-gray-400 dark:hover:border-neutral-500
+        hover:bg-gray-50 dark:hover:bg-neutral-700
+        transition-all duration-200 cursor-pointer
       "
     >
       {/* ── Header: Badges + repo name ────────────────────── */}
@@ -71,11 +84,6 @@ export default function ProjectCard({
       </header>
 
       {/* ── Left accent bar + content ────────────────────────────── */}
-      {/*
-        The thin vertical accent bar on the left is a direct reference to
-        the GitHub pinned card aesthetic. It uses a flex row with a narrow
-        div as the bar, and the remaining content in a flex column.
-      */}
       <div className="flex gap-3">
 
         {/* Accent bar */}
@@ -108,14 +116,7 @@ export default function ProjectCard({
 
           {/* ── Footer: language · stars · forks · updated ──────── */}
           <footer className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-500 font-mono">
-
-            {/* Language dot + name */}
             <span className="flex items-center gap-1.5">
-              {/*
-                Rust's canonical colour is #dea584 — a soft orange-brown.
-                Hard-coding this is deliberate: it's a well-known display
-                convention (like GitHub's language colours), not a theme colour.
-              */}
               <span
                 className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
                 style={{ backgroundColor: languageColor }}
@@ -123,24 +124,21 @@ export default function ProjectCard({
               {language}
             </span>
 
-            {/* Star count — ☆ keeps it icon-free without importing an icon lib */}
             <span className="flex items-center gap-1">
               <span aria-hidden="true">☆</span>
               {stars.toLocaleString()}
             </span>
 
-            {/* Fork count — ⑂ is the Unicode git-fork symbol */}
             <span className="flex items-center gap-1">
               <span aria-hidden="true">⑂</span>
               {forks}
             </span>
 
-            {/* Relative timestamp — pushed to the far right */}
             <span className="ml-auto">{updatedAt}</span>
           </footer>
 
         </div>
       </div>
-    </article>
+    </Link>
   )
 }

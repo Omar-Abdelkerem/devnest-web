@@ -26,15 +26,16 @@
 
 import { useTheme } from './hooks/useTheme'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Navbar      from './components/Navbar'
-import Hero        from './components/Hero'
-import HowItWorks  from './components/HowItWorks'
-import Stats       from './components/Stats'
-import Footer      from './components/Footer'
+import Navbar from './components/Navbar'
+import Hero from './components/Hero'
+import HowItWorks from './components/HowItWorks'
+import Stats from './components/Stats'
+import Footer from './components/Footer'
 import ProfilePage from './components/ProfilePage'
 import ProfileEmptyPage from './components/ProfileEmptyPage'
-import SignInPage  from './components/SignInPage'
+import SignInPage from './components/SignInPage'
 import RegisterPage from './components/RegisterPage'
+import ProjectDetailsPage from './components/ProjectDetailsPage'
 
 export default function App() {
   // theme = 'dark' | 'light'
@@ -43,43 +44,44 @@ export default function App() {
 
   return (
     <BrowserRouter>
-    {/*
+      {/*
      * The outer div has `font-sans` so Inter applies everywhere by default.
      * `antialiased` enables subpixel font rendering for crisp text on most
      * screens — standard practice for dark UI designs.
      * `min-h-screen` ensures the dark/light background fills the viewport
      * even on short pages.
      */}
-    <div className="font-sans antialiased min-h-screen flex flex-col bg-white dark:bg-[#161616]">
+      <div className="font-sans antialiased min-h-screen flex flex-col bg-white dark:bg-[#161616]">
 
-      {/* ── Navigation ────────────────────────────────────────────── */}
-      {/*
+        {/* ── Navigation ────────────────────────────────────────────── */}
+        {/*
         Navbar receives theme so it can label the toggle correctly
         ("Light" when in dark mode, "dark" when in light mode),
         and onToggle to call back up to the hook.
       */}
-      <Navbar theme={theme} onToggle={toggleTheme} />
+        <Navbar theme={theme} onToggle={toggleTheme} />
 
-      {/* ── Main content ──────────────────────────────────────────── */}
-      <main className="flex-1 flex flex-col">
-        <Routes>
-          <Route path="/" element={
-            <>
-              <Hero />
-              <HowItWorks />
-              <Stats />
-            </>
-          } />
-          <Route path="/login" element={<SignInPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/profile-demo" element={<ProfilePage />} />
-          <Route path="/profile-empty-demo" element={<ProfileEmptyPage />} />
-        </Routes>
-      </main>
+        {/* ── Main content ──────────────────────────────────────────── */}
+        <main className="flex-1 flex flex-col">
+          <Routes>
+            <Route path="/" element={
+              <>
+                <Hero />
+                <HowItWorks />
+                <Stats />
+              </>
+            } />
+            <Route path="/login" element={<SignInPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/profile-demo" element={<ProfilePage />} />
+            <Route path="/profile-empty-demo" element={<ProfileEmptyPage />} />
+            <Route path="/project/:projectId" element={<ProjectDetailsPage />} />
+          </Routes>
+        </main>
 
-      {/* ── Site footer ───────────────────────────────────────────── */}
-      <Footer />
-    </div>
+        {/* ── Site footer ───────────────────────────────────────────── */}
+        <Footer />
+      </div>
     </BrowserRouter>
   )
 }
