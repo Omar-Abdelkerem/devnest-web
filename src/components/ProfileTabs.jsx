@@ -9,8 +9,8 @@ export default function ProfileTabs({ projectCount = 0 }) {
   return (
     <div className="border-b border-gray-200 dark:border-neutral-800 mb-6">
       <nav className="flex gap-8">
-        <a 
-          href="#" 
+        <a
+          href="#"
           className="flex items-center gap-2 pb-3 border-b-2 border-accent text-sm font-semibold text-gray-900 dark:text-gray-100"
         >
           Projects
@@ -18,14 +18,14 @@ export default function ProfileTabs({ projectCount = 0 }) {
             {projectCount}
           </span>
         </a>
-        <a 
-          href="#" 
+        <a
+          href="#"
           className="flex items-center gap-2 pb-3 border-b-2 border-transparent text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
         >
           Activity
         </a>
-        <a 
-          href="#" 
+        <a
+          href="#"
           className="flex items-center gap-2 pb-3 border-b-2 border-transparent text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
         >
           Feedback received

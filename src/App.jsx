@@ -1,87 +1,67 @@
-/**
- * App.jsx — Root application component for DevNest
- *
- * Responsibilities:
- *   1. Call useTheme() to get the current theme and a toggle function.
- *      This hook manages localStorage persistence and the <html> dark class.
- *
- *   2. Compose the full page layout by assembling our named components
- *      in the correct order: Navbar → Hero → HowItWorks → Stats → Footer.
- *
- *   3. Pass { theme, onToggle } down to Navbar — the only component that
- *      needs to DISPLAY the toggle button and therefore needs both values.
- *      All other components respond to the <html> dark class automatically
- *      via Tailwind's dark: variants.
- *
- * Why doesn't App manage page-level theming classes directly?
- *   The <html> class is managed inside useTheme via useEffect, keeping the
- *   DOM mutation co-located with the state that drives it. App just consumes
- *   the hook's output — separation of concerns.
- *
- * Font note:
- *   `font-sans` applies Inter (defined in tailwind.config.js) to the whole
- *   app via the wrapping <div>. Individual components can override with
- *   `font-mono` where needed (tags, stats numbers, eyebrows).
- */
-
 import { useTheme } from './hooks/useTheme'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Navbar from './components/Navbar'
-import Hero from './components/Hero'
-import HowItWorks from './components/HowItWorks'
-import Stats from './components/Stats'
-import Footer from './components/Footer'
-import ProfilePage from './components/ProfilePage'
-import ProfileEmptyPage from './components/ProfileEmptyPage'
-import SignInPage from './components/SignInPage'
-import RegisterPage from './components/RegisterPage'
-import ProjectDetailsPage from './components/ProjectDetailsPage'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider, useAuth } from './context/AuthContext'
 
-export default function App() {
-  // theme = 'dark' | 'light'
-  // toggleTheme = () => void — flips and persists the theme
-  const { theme, toggleTheme } = useTheme()
+import Navbar from './components/Navbar'
+import Footer from './components/Footer'
+import HomePage from './pages/HomePage'
+import ProfilePage from './pages/ProfilePage'
+import ProfileEmptyPage from './pages/ProfileEmptyPage'
+import SignInPage from './pages/SignInPage'
+import RegisterPage from './pages/RegisterPage'
+import ProjectDetailsPage from './pages/ProjectDetailsPage'
+import NotFoundPage from './pages/NotFoundPage'
+import NewProjectPage from './pages/NewProjectPage'
+import SettingsPage from './pages/SettingsPage' // <-- NEW IMPORT
+
+function AppRoutes({ theme, toggleTheme }) {
+  const { user, isAuthLoading } = useAuth();
+
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-[#161616] flex items-center justify-center">
+        <span className="text-gray-500 font-mono text-sm tracking-widest uppercase">Verifying session...</span>
+      </div>
+    );
+  }
 
   return (
-    <BrowserRouter>
-      {/*
-     * The outer div has `font-sans` so Inter applies everywhere by default.
-     * `antialiased` enables subpixel font rendering for crisp text on most
-     * screens — standard practice for dark UI designs.
-     * `min-h-screen` ensures the dark/light background fills the viewport
-     * even on short pages.
-     */}
-      <div className="font-sans antialiased min-h-screen flex flex-col bg-white dark:bg-[#161616]">
+    <div className="font-sans antialiased min-h-screen flex flex-col bg-white dark:bg-[#161616]">
+      <Navbar theme={theme} onToggle={toggleTheme} />
 
-        {/* ── Navigation ────────────────────────────────────────────── */}
-        {/*
-        Navbar receives theme so it can label the toggle correctly
-        ("Light" when in dark mode, "dark" when in light mode),
-        and onToggle to call back up to the hook.
-      */}
-        <Navbar theme={theme} onToggle={toggleTheme} />
+      <main className="flex-1 flex flex-col">
+        <Routes>
+          <Route path="/" element={user ? <Navigate to="/profile" replace /> : <HomePage />} />
+          <Route path="/welcome" element={<HomePage />} />
+          <Route path="/login" element={user ? <Navigate to="/profile" replace /> : <SignInPage />} />
+          <Route path="/register" element={user ? <Navigate to="/profile" replace /> : <RegisterPage />} />
 
-        {/* ── Main content ──────────────────────────────────────────── */}
-        <main className="flex-1 flex flex-col">
-          <Routes>
-            <Route path="/" element={
-              <>
-                <Hero />
-                <HowItWorks />
-                <Stats />
-              </>
-            } />
-            <Route path="/login" element={<SignInPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/profile-demo" element={<ProfilePage />} />
-            <Route path="/profile-empty-demo" element={<ProfileEmptyPage />} />
-            <Route path="/project/:projectId" element={<ProjectDetailsPage />} />
-          </Routes>
-        </main>
+          <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/login" replace />} />
+          <Route path="/projects/new" element={user ? <NewProjectPage /> : <Navigate to="/login" replace />} />
 
-        {/* ── Site footer ───────────────────────────────────────────── */}
-        <Footer />
-      </div>
-    </BrowserRouter>
+          {/* NEW ROUTE: Settings / Edit Profile */}
+          <Route path="/settings" element={user ? <SettingsPage /> : <Navigate to="/login" replace />} />
+
+          <Route path="/profile-demo" element={<ProfilePage />} />
+          <Route path="/profile-empty-demo" element={<ProfileEmptyPage />} />
+
+          <Route path="/project/:projectId" element={<ProjectDetailsPage />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
+
+export default function App() {
+  const { theme, toggleTheme } = useTheme()
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <AppRoutes theme={theme} toggleTheme={toggleTheme} />
+      </BrowserRouter>
+    </AuthProvider>
   )
 }

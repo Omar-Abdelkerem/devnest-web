@@ -1,20 +1,11 @@
-/**
- * ProfileSidebar.jsx — Left column of the profile page
- *
- * Displays user information (avatar, name, bio, location, etc.)
- * Supports both a "filled" state (Maren) and an "empty/new user" state (Aleksa).
- *
- * Props:
- *   user — { name, handle, bio, location, company, website, joinedYear, followers, following, skills }
- *   isEmpty — boolean to trigger the empty state placeholders
- */
+import { Link } from 'react-router-dom'
 
 export default function ProfileSidebar({ user, isEmpty }) {
   return (
     <aside className="flex flex-col gap-6 w-full lg:w-64 shrink-0">
-      
+
       {/* ── Avatar ──────────────────────────────────────────────── */}
-      <div 
+      <div
         className={`
           w-48 h-48 rounded-xl flex items-center justify-center
           ${isEmpty ? 'border border-dashed border-gray-300 dark:border-neutral-700 bg-transparent' : 'bg-gray-200 dark:bg-neutral-800'}
@@ -22,7 +13,6 @@ export default function ProfileSidebar({ user, isEmpty }) {
       >
         {isEmpty ? (
           <div className="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-500">
-            {/* Simple generic user icon for empty state */}
             <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
@@ -30,20 +20,30 @@ export default function ProfileSidebar({ user, isEmpty }) {
             <span className="text-xs">add photo</span>
           </div>
         ) : (
-          <svg width="64" height="64" fill="currentColor" viewBox="0 0 24 24" className="text-gray-400 dark:text-neutral-700">
-            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-          </svg>
+          <div className="w-full h-full flex items-center justify-center bg-emerald-900 text-emerald-400 font-bold text-5xl rounded-xl">
+            {user.handle ? user.handle.charAt(0).toUpperCase() : 'U'}
+          </div>
         )}
       </div>
 
-      {/* ── Name & Handle ───────────────────────────────────────── */}
-      <div>
-        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{user.name}</h1>
-        <p className="text-sm font-mono text-gray-500 dark:text-gray-400">{user.handle}</p>
+      {/* ── Name, Handle & Edit Button ────────────────────────── */}
+      <div className="flex flex-col gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">{user.name}</h1>
+          <p className="text-sm font-mono text-gray-500 dark:text-gray-400">@{user.handle}</p>
+        </div>
+
+        {/* NEW: Edit Profile Button */}
+        <Link
+          to="/settings"
+          className="w-full text-center py-1.5 px-3 border border-gray-300 dark:border-neutral-700 rounded-md text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-neutral-800 transition-colors"
+        >
+          Edit Profile
+        </Link>
       </div>
 
       {/* ── Bio ─────────────────────────────────────────────────── */}
-      {isEmpty ? (
+      {isEmpty || !user.bio ? (
         <div className="text-sm text-gray-500 dark:text-gray-500 border border-dashed border-gray-300 dark:border-neutral-700 rounded-lg p-4">
           Add a short bio — what you work on, what you're interested in.
         </div>
@@ -70,7 +70,7 @@ export default function ProfileSidebar({ user, isEmpty }) {
         {user.website && (
           <li className="flex items-center gap-2">
             <svg className="w-4 h-4 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-            <a href={`https://${user.website}`} className="hover:text-accent transition-colors">{user.website}</a>
+            <a href={user.website.startsWith('http') ? user.website : `https://${user.website}`} target="_blank" rel="noreferrer" className="hover:text-accent transition-colors">{user.website}</a>
           </li>
         )}
         <li className="flex items-center gap-2">
@@ -92,14 +92,14 @@ export default function ProfileSidebar({ user, isEmpty }) {
       {/* ── Skills ──────────────────────────────────────────────── */}
       <div className="mt-4">
         <h3 className="text-[11px] font-mono uppercase tracking-widest text-gray-500 dark:text-gray-500 mb-3">Skills</h3>
-        {isEmpty ? (
-          <button className="text-xs font-mono text-gray-500 dark:text-gray-500 border border-dashed border-gray-300 dark:border-neutral-700 rounded-lg px-4 py-2 w-full text-left hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+        {isEmpty || !user.skills || user.skills.length === 0 ? (
+          <Link to="/settings" className="block text-center text-xs font-mono text-gray-500 dark:text-gray-500 border border-dashed border-gray-300 dark:border-neutral-700 rounded-lg px-4 py-2 w-full hover:text-gray-700 dark:hover:text-gray-300 transition-colors cursor-pointer">
             + Add skills
-          </button>
+          </Link>
         ) : (
           <div className="flex flex-wrap gap-2">
-            {user.skills.map((skill) => (
-              <span 
+            {user.skills?.map((skill) => (
+              <span
                 key={skill}
                 className="text-xs font-mono px-2.5 py-1 rounded bg-gray-100 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 text-gray-600 dark:text-gray-400"
               >
@@ -109,7 +109,6 @@ export default function ProfileSidebar({ user, isEmpty }) {
           </div>
         )}
       </div>
-
     </aside>
   )
 }

@@ -2,9 +2,9 @@
  * ProfileEmptyPage.jsx — Assembles the empty profile state for a new user
  */
 
-import ProfileSidebar from './ProfileSidebar'
-import ProfileTabs from './ProfileTabs'
-import ProfileEmptyState from './ProfileEmptyState'
+import ProfileSidebar from '../components/ProfileSidebar'
+import ProfileTabs from '../components/ProfileTabs'
+import ProfileEmptyState from '../components/ProfileEmptyState'
 
 export default function ProfileEmptyPage() {
   const aleksaData = {

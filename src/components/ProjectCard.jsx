@@ -4,34 +4,11 @@
  * This mimics a GitHub-style pinned repository card, as seen in the screenshot.
  * It's intentionally self-contained so it could be reused in a future
  * "portfolio grid" feature.
- *
- * Structure:
- *   <article>
- *     ├── Header:  "PINNED" badge + repo name (accent)
- *     ├── Left accent bar (thin vertical line — GitHub pinned card style)
- *     ├── Description (small, muted, line-clamped to 2 rows)
- *     ├── Tech tag chips (rust, cli, deployment)
- *     └── Footer: language dot + star/fork counts + relative timestamp
- *
- * Theming:
- *   Light mode: white card with gray border.
- *   Dark mode: dark neutral-800 card with neutral-700 border.
- *   The card is always slightly elevated above its section background
- *   (white on gray / dark-800 on dark-900) to create the "card on page" depth.
- *
- * Props:
- *   All props have defaults matching the screenshot so it works out of the box.
- */
-/**
- * ProjectCard.jsx — "Example Project" widget shown in the Hero right column
- *
- * This mimics a GitHub-style pinned repository card, as seen in the screenshot.
- * It's intentionally self-contained so it could be reused in a future
- * "portfolio grid" feature.
  */
 import { Link } from 'react-router-dom'
 
 export default function ProjectCard({
+  id = '00000000-0000-0000-0000-000000000000', // <-- Added UUID expectation
   repo = 'maren-k/forge-cli',
   description = 'A zero-config deployment tool for monorepos. Detects changed packages using a content-addressed cache…',
   tags = ['rust', 'cli', 'deployment'],
@@ -42,10 +19,9 @@ export default function ProjectCard({
   forks = 62,
   updatedAt = '3 days ago',
 }) {
-  // Changed <article> to <Link> to make the whole card clickable
   return (
     <Link
-      to={`/project/${encodeURIComponent(repo)}`}
+      to={`/project/${id}`} // <-- Now strictly routes using the UUID
       className="
         block rounded-lg border p-4
         bg-white dark:bg-neutral-800
