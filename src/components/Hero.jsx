@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import ProjectCard from './ProjectCard'
+import { apiFetch } from '../lib/api'
 
 export default function Hero() {
   const [featuredProject, setFeaturedProject] = useState(null)
@@ -8,8 +9,7 @@ export default function Hero() {
   useEffect(() => {
     async function fetchFeatured() {
       try {
-        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-        const response = await fetch(`${baseUrl}/api/v1/projects`)
+        const response = await apiFetch('/api/v1/projects')
 
         if (response.ok) {
           const data = await response.json()

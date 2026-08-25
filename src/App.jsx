@@ -10,9 +10,14 @@ import ProfileEmptyPage from './pages/ProfileEmptyPage'
 import SignInPage from './pages/SignInPage'
 import RegisterPage from './pages/RegisterPage'
 import ProjectDetailsPage from './pages/ProjectDetailsPage'
+import EditProjectPage from './pages/EditProjectPage'
 import NotFoundPage from './pages/NotFoundPage'
 import NewProjectPage from './pages/NewProjectPage'
-import SettingsPage from './pages/SettingsPage' // <-- NEW IMPORT
+import SettingsPage from './pages/SettingsPage'
+import ExplorePage from './pages/ExplorePage'         // <-- NEW IMPORT
+import PublicProfilePage from './pages/PublicProfilePage' // <-- NEW IMPORT
+import StaticPage from './pages/StaticPage'
+import StarredProjectsPage from './pages/StarredProjectsPage'
 
 function AppRoutes({ theme, toggleTheme }) {
   const { user, isAuthLoading } = useAuth();
@@ -36,20 +41,26 @@ function AppRoutes({ theme, toggleTheme }) {
           <Route path="/login" element={user ? <Navigate to="/profile" replace /> : <SignInPage />} />
           <Route path="/register" element={user ? <Navigate to="/profile" replace /> : <RegisterPage />} />
 
+          {/* NEW ROUTES */}
+          <Route path="/about" element={<StaticPage title="About DevNest" />} />
+          <Route path="/api-docs" element={<StaticPage title="API Documentation (Swagger)" />} />
+          <Route path="/privacy" element={<StaticPage title="Privacy Policy" />} />
+          <Route path="/terms" element={<StaticPage title="Terms of Service" />} />
+          <Route path="/explore" element={<ExplorePage />} />
+          <Route path="/u/:username" element={<PublicProfilePage />} />
+          <Route path="/starred" element={<StarredProjectsPage />} />
           <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/login" replace />} />
           <Route path="/projects/new" element={user ? <NewProjectPage /> : <Navigate to="/login" replace />} />
-
-          {/* NEW ROUTE: Settings / Edit Profile */}
           <Route path="/settings" element={user ? <SettingsPage /> : <Navigate to="/login" replace />} />
+
+          <Route path="/project/:projectId/edit" element={user ? <EditProjectPage /> : <Navigate to="/login" replace />} />
+          <Route path="/project/:projectId" element={<ProjectDetailsPage />} />
 
           <Route path="/profile-demo" element={<ProfilePage />} />
           <Route path="/profile-empty-demo" element={<ProfileEmptyPage />} />
-
-          <Route path="/project/:projectId" element={<ProjectDetailsPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
-
       <Footer />
     </div>
   );

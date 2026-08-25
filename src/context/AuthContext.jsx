@@ -1,24 +1,20 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { apiFetch } from '../lib/api';
 
 const AuthContext = createContext();
 
-export function AuthProvider({ children }) {
+function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [isAuthLoading, setIsAuthLoading] = useState(true);
 
     useEffect(() => {
         async function checkSession() {
             try {
-                const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-                const response = await fetch(`${baseUrl}/api/v1/user/me`, {
-                    credentials: 'include'
-                });
+                const response = await apiFetch('/api/v1/user/me');
 
                 if (response.ok) {
                     const data = await response.json();
 
-                    // SMART UNWRAPPER: Find the user object no matter how the backend nested it.
                     let actualUser = data;
                     if (data.user) {
                         actualUser = data.user;
@@ -50,6 +46,8 @@ export function AuthProvider({ children }) {
     );
 }
 
-export function useAuth() {
+function useAuth() {
     return useContext(AuthContext);
 }
+
+export { AuthProvider, useAuth };

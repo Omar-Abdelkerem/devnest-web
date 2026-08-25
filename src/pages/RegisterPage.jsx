@@ -7,6 +7,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout'
+import { apiFetch } from '../lib/api'
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('')
@@ -21,11 +22,8 @@ export default function RegisterPage() {
     setIsLoading(true)
 
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-      const response = await fetch(`${baseUrl}/api/v1/auth/register`, {
+      const response = await apiFetch('/api/v1/auth/register', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify({ username, email, password }),
       })
 

@@ -8,6 +8,7 @@
 
 import { useState, useEffect } from 'react'
 import ProjectCard from './ProjectCard'
+import { apiFetch, getProjectAuthor } from '../lib/api'
 
 export default function ProjectGrid({ projects = null }) {
   const [fetchedProjects, setFetchedProjects] = useState([])
@@ -22,11 +23,7 @@ export default function ProjectGrid({ projects = null }) {
     async function fetchGlobalProjects() {
       setIsLoading(true)
       try {
-        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-
-        // Fetching the global public feed. 
-        // We do not include credentials here because this is for logged-out visitors too.
-        const response = await fetch(`${baseUrl}/api/v1/projects`)
+        const response = await apiFetch('/api/v1/projects')
 
         if (response.ok) {
           const data = await response.json()
@@ -72,11 +69,12 @@ export default function ProjectGrid({ projects = null }) {
   // We map the data to ensure the backend JSON keys match what ProjectCard expects.
   // If the data came from ProfilePage, it already has 'repo' set, so we don't map it twice.
   const mappedProjects = displayProjects.map((p) => {
-    if (p.repo) return p // Already formatted
+    if (p.repo) return p
 
+    const author = getProjectAuthor(p)
     return {
       id: p.id,
-      repo: p.title || p.name || 'Untitled', // Formats title for the card
+      repo: p.title || p.name || 'Untitled',
       description: p.description,
       tags: p.tags || [],
       badges: p.isPublic ? [] : ['PRIVATE'],
@@ -84,14 +82,20 @@ export default function ProjectGrid({ projects = null }) {
       languageColor: p.languageColor || '#dea584',
       stars: p._count?.stars || 0,
       forks: p.forks || 0,
-      updatedAt: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'Recently'
+      updatedAt: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'Recently',
+      author: author.name,
+      authorUsername: author.slug,
+      authorHandle: author.slug,
+      authorAvatar: author.avatar,
+      owner: p.owner || p.user,
+      user: p.user || p.owner,
     }
   })
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
       {mappedProjects.map((project, index) => (
-        <ProjectCard key={project.id || index} {...project} />
+        <ProjectCard key={project.id || index} project={project} />
       ))}
     </div>
   )
