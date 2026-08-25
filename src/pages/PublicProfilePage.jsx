@@ -144,7 +144,13 @@ export default function PublicProfilePage() {
     }
 
     const handle = profileUser.username || username
+    const mappedSkills = skills.map(s => {
+        if (typeof s === 'string') return { name: s, level: '' };
+        return { name: s?.name || s?.title || '', level: s?.level || '' };
+    }).filter(s => s.name);
 
+    console.log("RAW SKILLS FROM API:", skills);
+    console.log("MAPPED SKILLS FOR SIDEBAR:", mappedSkills);
     // FIXED: Uses the exact same object mapping logic as your private ProfilePage.jsx
     const profileData = {
         name: profileUser.name || handle,
@@ -155,10 +161,7 @@ export default function PublicProfilePage() {
         links: profileUser.links || [],
         followers: profileUser._count?.followers || profileUser.followers || 0,
         following: profileUser._count?.following || profileUser.following || 0,
-        skills: skills.map(s => {
-            if (typeof s === 'string') return { name: s, level: '' };
-            return { name: s?.name || s?.title || '', level: s?.level || '' };
-        }).filter(s => s.name),
+        skills: mappedSkills,
     }
 
     // FIXED: Uses the exact same comprehensive mapping logic as your private ProfilePage.jsx

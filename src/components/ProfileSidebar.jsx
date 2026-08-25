@@ -63,14 +63,17 @@ export default function ProfileSidebar({ user, isEmpty, isPublicView }) {
         {user?.skills && Array.isArray(user.skills) && user.skills.length > 0 ? (
           <div className="flex flex-wrap justify-center lg:justify-start gap-2">
             {user.skills.map((skill, idx) => {
-              if (!skill.name) return null;
+              // Safely extract whether it's an object with a name or a plain string
+              const skillName = typeof skill === 'string' ? skill : skill?.name;
+              if (!skillName) return null;
+
               return (
                 <span
                   key={idx}
                   className="flex items-center gap-1.5 text-xs font-mono px-2.5 py-1 rounded bg-gray-100 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 text-gray-700 dark:text-gray-300"
                 >
-                  {skill.name}
-                  {skill.level && (
+                  {skillName}
+                  {skill?.level && (
                     <span className="text-[9px] font-bold text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-neutral-700 px-1 rounded-sm opacity-80">
                       {skill.level}
                     </span>
@@ -80,7 +83,7 @@ export default function ProfileSidebar({ user, isEmpty, isPublicView }) {
             })}
           </div>
         ) : (
-          <p className="text-sm text-gray-400 dark:text-gray-500 font-mono italic">No skills added yet.</p>
+          <p className="text-xs text-gray-500 font-mono">No skills added yet.</p>
         )}
       </div>
 
