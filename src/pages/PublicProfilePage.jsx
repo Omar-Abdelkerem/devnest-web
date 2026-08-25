@@ -18,7 +18,6 @@ export default function PublicProfilePage() {
     const [error, setError] = useState(null)
     const [activeTab, setActiveTab] = useState('projects')
 
-    // New feedback form state
     const [newFeedback, setNewFeedback] = useState('')
     const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false)
 
@@ -52,11 +51,15 @@ export default function PublicProfilePage() {
                 if (projectsRes.ok) {
                     const projectsData = await projectsRes.json()
                     setProjects(Array.isArray(projectsData) ? projectsData : (projectsData.data || projectsData.projects || []))
+                } else {
+                    console.error("Backend rejected the projects fetch. Check your backend auth middleware!");
                 }
 
                 if (skillsRes.ok) {
                     const skillsData = await skillsRes.json()
                     setSkills(Array.isArray(skillsData) ? skillsData : (skillsData.data || skillsData.skills || []))
+                } else {
+                    console.error("Backend rejected the skills fetch. Check your backend auth middleware!");
                 }
 
                 if (feedbackRes.ok) {
@@ -141,6 +144,8 @@ export default function PublicProfilePage() {
     }
 
     const handle = profileUser.username || username
+
+    // FIXED: Uses the exact same object mapping logic as your private ProfilePage.jsx
     const profileData = {
         name: profileUser.name || handle,
         handle,
@@ -150,27 +155,34 @@ export default function PublicProfilePage() {
         links: profileUser.links || [],
         followers: profileUser._count?.followers || profileUser.followers || 0,
         following: profileUser._count?.following || profileUser.following || 0,
-        skills: skills.map(s => typeof s === 'string' ? s : s.name),
+        skills: skills.map(s => {
+            if (typeof s === 'string') return { name: s, level: '' };
+            return { name: s?.name || s?.title || '', level: s?.level || '' };
+        }).filter(s => s.name),
     }
 
-    const mappedProjects = projects.map(p => ({
-        id: p.id,
-        repo: p.title || p.name || 'Untitled Project',
-        description: p.description || '',
-        tags: p.tags || [],
-        badges: p.isPublic ? [] : ['PRIVATE'],
-        language: p.language || 'Code',
-        languageColor: p.languageColor || '#dea584',
-        stars: p._count?.stars || 0,
-        forks: p.forks || 0,
-        updatedAt: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'Recently',
-        author: handle,
-        authorUsername: handle,
-        authorHandle: handle,
-        authorAvatar: profileUser.avatarUrl,
-        owner: { username: handle, avatarUrl: profileUser.avatarUrl },
-        user: { username: handle, avatarUrl: profileUser.avatarUrl },
-    }))
+    // FIXED: Uses the exact same comprehensive mapping logic as your private ProfilePage.jsx
+    const mappedProjects = projects.map(p => {
+        if (!p) return null;
+        return {
+            id: p.id,
+            repo: p.title || p.name || 'Untitled Project',
+            description: p.description || '',
+            tags: p.tags || [],
+            badges: p.isPublic === false ? ['PRIVATE'] : [],
+            language: p.language || (p.languages && p.languages.length > 0 ? (typeof p.languages[0] === 'string' ? p.languages[0] : p.languages[0].name) : null) || 'Code',
+            languageColor: p.languageColor || '#2a8a7e',
+            stars: p._count?.stars || 0,
+            forks: p.forks || 0,
+            updatedAt: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'Recently',
+            author: handle,
+            authorUsername: handle,
+            authorHandle: handle,
+            authorAvatar: profileUser.avatarUrl,
+            owner: { username: handle, avatarUrl: profileUser.avatarUrl },
+            user: { username: handle, avatarUrl: profileUser.avatarUrl },
+        };
+    }).filter(Boolean);
 
     const isOwnProfile = currentUser && (currentUser.id === profileUser.id || currentUser.username === profileUser.username);
 
