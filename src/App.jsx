@@ -36,12 +36,17 @@ function AppRoutes({ theme, toggleTheme }) {
 
       <main className="flex-1 flex flex-col">
         <Routes>
-          <Route path="/" element={user ? <Navigate to="/profile" replace /> : <HomePage />} />
+          {/* Redirect to /profile/USERNAME if logged in */}
+          <Route path="/" element={user ? <Navigate to={`/profile/${user.username}`} replace /> : <HomePage />} />
           <Route path="/welcome" element={<HomePage />} />
-          <Route path="/login" element={user ? <Navigate to="/profile" replace /> : <SignInPage />} />
-          <Route path="/register" element={user ? <Navigate to="/profile" replace /> : <RegisterPage />} />
+          <Route path="/login" element={user ? <Navigate to={`/profile/${user.username}`} replace /> : <SignInPage />} />
+          <Route path="/register" element={user ? <Navigate to={`/profile/${user.username}`} replace /> : <RegisterPage />} />
 
-          {/* NEW ROUTES */}
+          {/* If someone goes directly to /profile, redirect to their username */}
+          <Route path="/profile" element={user ? <Navigate to={`/profile/${user.username}`} replace /> : <Navigate to="/login" replace />} />
+          <Route path="/profile/:username" element={user ? <ProfilePage /> : <Navigate to="/login" replace />} />
+
+          {/* Other Routes */}
           <Route path="/about" element={<StaticPage title="About DevNest" />} />
           <Route path="/api-docs" element={<StaticPage title="API Documentation (Swagger)" />} />
           <Route path="/privacy" element={<StaticPage title="Privacy Policy" />} />
@@ -49,13 +54,10 @@ function AppRoutes({ theme, toggleTheme }) {
           <Route path="/explore" element={<ExplorePage />} />
           <Route path="/u/:username" element={<PublicProfilePage />} />
           <Route path="/starred" element={<StarredProjectsPage />} />
-          <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/login" replace />} />
           <Route path="/projects/new" element={user ? <NewProjectPage /> : <Navigate to="/login" replace />} />
           <Route path="/settings" element={user ? <SettingsPage /> : <Navigate to="/login" replace />} />
-
           <Route path="/project/:projectId/edit" element={user ? <EditProjectPage /> : <Navigate to="/login" replace />} />
           <Route path="/project/:projectId" element={<ProjectDetailsPage />} />
-
           <Route path="/profile-demo" element={<ProfilePage />} />
           <Route path="/profile-empty-demo" element={<ProfileEmptyPage />} />
           <Route path="*" element={<NotFoundPage />} />

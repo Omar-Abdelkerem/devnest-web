@@ -13,6 +13,7 @@ export default function ProfilePage() {
   const [feedback, setFeedback] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('projects')
+  const [copied, setCopied] = useState(false) // Added state for button
 
   useEffect(() => {
     if (!user) {
@@ -69,11 +70,24 @@ export default function ProfilePage() {
     } catch (err) { setFeedback(previousFeedback); }
   }
 
+  const displayUsername = user?.username || (user?.email ? user.email.split('@')[0] : 'developer')
+
+  // BUTTON LOGIC: Copies your public /u/username link
+  const handleCopyProfileLink = async () => {
+    if (!displayUsername) return;
+    const shareableUrl = `${window.location.origin}/u/${displayUsername}`;
+    try {
+      await navigator.clipboard.writeText(shareableUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy link:', err);
+    }
+  }
+
   if (isLoading) {
     return <div className="min-h-screen bg-white dark:bg-[#161616] flex items-center justify-center text-gray-400 font-mono text-sm">Loading profile...</div>
   }
-
-  const displayUsername = user?.username || (user?.email ? user.email.split('@')[0] : 'developer')
 
   // SECURE OBJECT MAPPING: Preserves the level for the sidebar UI
   const profileData = {
@@ -124,6 +138,25 @@ export default function ProfilePage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 dark:border-white/10 mb-6">
           <ProfileTabs projectCount={mappedProjects.length} activeTab={activeTab} onTabChange={setActiveTab} />
           <div className="hidden sm:flex items-center gap-3 mb-2">
+
+            {/* NEW COPY LINK BUTTON */}
+            <button
+              onClick={handleCopyProfileLink}
+              className="flex items-center gap-2 bg-gray-50 dark:bg-neutral-900 hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-neutral-700 text-sm font-semibold px-4 py-1.5 rounded-md transition-colors shadow-sm cursor-pointer"
+            >
+              {copied ? (
+                <>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-500"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                  <span className="text-green-500">Copied!</span>
+                </>
+              ) : (
+                <>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                  <span>Share Profile</span>
+                </>
+              )}
+            </button>
+
             <Link to="/starred" className="flex items-center gap-2 bg-gray-50 dark:bg-neutral-900 hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-neutral-700 text-sm font-semibold px-4 py-1.5 rounded-md transition-colors shadow-sm">★ Stars</Link>
             <Link to="/projects/new" className="flex items-center gap-2 bg-accent hover:bg-accent-light text-white text-sm font-semibold px-4 py-1.5 rounded-md transition-colors shadow-sm"><svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg>New Project</Link>
           </div>
