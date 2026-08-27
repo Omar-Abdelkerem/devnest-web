@@ -6,9 +6,10 @@
  *     ├── Logo: "Dev" (accent) + "Nest" (white)
  *     │     Note: in the footer the logo colouring FLIPS vs the navbar —
  *     │     "Dev" is accent and "Nest" is white. This matches the screenshot.
- *     ├── Nav links: About, Blog, Changelog, API, Privacy, Terms
+ *     ├── Nav links: About, API Docs, Privacy, Terms
  *     └── Copyright: "© 2026 DevNest"
  *
+ * Removed: Blog and Changelog — no content exists yet.
  * The footer stays dark in both themes (same reason as the Navbar and Stats
  * band — the dark footer anchors the page bottom visually).
  *
@@ -17,7 +18,14 @@
  *   Stacked on mobile (flex-col, items-center).
  */
 
-const FOOTER_LINKS = ['About', 'Blog', 'Changelog', 'API', 'Privacy', 'Terms']
+import { Link } from 'react-router-dom'
+
+const FOOTER_LINKS = [
+  { label: 'About',    to: '/about'    },
+  { label: 'API Docs', to: '/api-docs' },
+  { label: 'Privacy',  to: '/privacy'  },
+  { label: 'Terms',    to: '/terms'    },
+]
 
 export default function Footer() {
   return (
@@ -38,10 +46,10 @@ export default function Footer() {
           In the footer the colour scheme flips: "Dev" is accent teal,
           "Nest" is white — this is intentional in the Figma design.
         */}
-        <a href="/" className="flex items-center font-bold text-base shrink-0">
+        <Link to="/" className="flex items-center font-bold text-base shrink-0">
           <span className="text-accent">Dev</span>
           <span className="text-white">Nest</span>
-        </a>
+        </Link>
 
         {/* ── Nav links ────────────────────────────────────────────── */}
         <nav
@@ -51,18 +59,18 @@ export default function Footer() {
             flex flex-wrap justify-center gap-x-6 gap-y-2
           "
         >
-          {FOOTER_LINKS.map((link) => (
-            <a
-              key={link}
-              href="#"
+          {FOOTER_LINKS.map(({ label, to }) => (
+            <Link
+              key={label}
+              to={to}
               className="
                 text-sm text-gray-500
                 hover:text-gray-300
                 transition-colors duration-150
               "
             >
-              {link}
-            </a>
+              {label}
+            </Link>
           ))}
         </nav>
 

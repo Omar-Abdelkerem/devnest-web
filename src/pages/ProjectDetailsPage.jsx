@@ -25,9 +25,12 @@ export default function ProjectDetailsPage() {
     useEffect(() => {
         async function fetchData() {
             try {
-                const projRes = await apiFetch(`/api/v1/projects/${projectId}`, {
-                    method: 'GET',
-                })
+                // Fire both requests concurrently — don't wait for the project
+                // response before starting the comments request.
+                const [projRes, commentsRes] = await Promise.all([
+                    apiFetch(`/api/v1/projects/${projectId}`, { method: 'GET' }),
+                    apiFetch(`/api/v1/projects/${projectId}/comments`),
+                ])
 
                 if (projRes.ok) {
                     const data = await projRes.json()
@@ -42,7 +45,6 @@ export default function ProjectDetailsPage() {
                     return
                 }
 
-                const commentsRes = await apiFetch(`/api/v1/projects/${projectId}/comments`)
                 if (commentsRes.ok) {
                     const cData = await commentsRes.json()
                     setComments(Array.isArray(cData) ? cData : (cData.data || []))

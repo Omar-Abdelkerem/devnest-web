@@ -14,10 +14,13 @@ import EditProjectPage from './pages/EditProjectPage'
 import NotFoundPage from './pages/NotFoundPage'
 import NewProjectPage from './pages/NewProjectPage'
 import SettingsPage from './pages/SettingsPage'
-import ExplorePage from './pages/ExplorePage'         // <-- NEW IMPORT
-import PublicProfilePage from './pages/PublicProfilePage' // <-- NEW IMPORT
-import StaticPage from './pages/StaticPage'
+import ExplorePage from './pages/ExplorePage'
+import PublicProfilePage from './pages/PublicProfilePage'
 import StarredProjectsPage from './pages/StarredProjectsPage'
+import AboutPage from './pages/AboutPage'
+import PrivacyPage from './pages/PrivacyPage'
+import TermsPage from './pages/TermsPage'
+import ApiDocsPage from './pages/ApiDocsPage'
 // This component decides which profile view to render
 function SmartProfileRoute() {
   const { username } = useParams();
@@ -59,11 +62,11 @@ function AppRoutes({ theme, toggleTheme }) {
           {/* Legacy route fallback */}
           <Route path="/profile" element={user ? <Navigate to={`/${user.username}`} replace /> : <Navigate to="/login" replace />} />
 
-          {/* Other Core Routes */}
-          <Route path="/about" element={<StaticPage title="About DevNest" />} />
-          <Route path="/api-docs" element={<StaticPage title="API Documentation (Swagger)" />} />
-          <Route path="/privacy" element={<StaticPage title="Privacy Policy" />} />
-          <Route path="/terms" element={<StaticPage title="Terms of Service" />} />
+          {/* Static / Legal / Doc Pages */}
+          <Route path="/about"    element={<AboutPage />} />
+          <Route path="/api-docs" element={<ApiDocsPage />} />
+          <Route path="/privacy"  element={<PrivacyPage />} />
+          <Route path="/terms"    element={<TermsPage />} />
           <Route path="/explore" element={<ExplorePage />} />
           <Route path="/starred" element={<StarredProjectsPage />} />
           <Route path="/projects/new" element={user ? <NewProjectPage /> : <Navigate to="/login" replace />} />
