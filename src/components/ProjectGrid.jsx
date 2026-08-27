@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from 'react'
 import ProjectCard from './ProjectCard'
-import { apiFetch, getProjectAuthor } from '../lib/api'
+import { apiFetch, getProjectAuthor, getStarCount } from '../lib/api'
 
 export default function ProjectGrid({ projects = null }) {
   const [fetchedProjects, setFetchedProjects] = useState([])
@@ -80,7 +80,8 @@ export default function ProjectGrid({ projects = null }) {
       badges: p.isPublic ? [] : ['PRIVATE'],
       language: p.language || 'Code',
       languageColor: p.languageColor || '#dea584',
-      stars: p._count?.stars || 0,
+      stars: getStarCount(p),
+      _count: p._count,
       forks: p.forks || 0,
       updatedAt: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'Recently',
       author: author.name,

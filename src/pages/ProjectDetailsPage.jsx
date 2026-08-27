@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { apiFetch, authorProfilePath, getProjectAuthor } from '../lib/api'
+import { apiFetch, authorProfilePath, getProjectAuthor, getStarCount } from '../lib/api'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
@@ -33,7 +33,7 @@ export default function ProjectDetailsPage() {
                     const data = await projRes.json()
                     const projData = data.data || data.project || data
                     setProject(projData)
-                    setStarCount(projData._count?.stars || 0)
+                    setStarCount(getStarCount(projData))
                     setIsStarred(projData.hasStarred || false)
                 } else {
                     const errText = await projRes.text()
@@ -231,20 +231,34 @@ export default function ProjectDetailsPage() {
                                             // Check if logged-in user owns this specific comment
                                             const canDelete = user && (user.id === comment.userId);
 
+                                            const commenter = comment.user || comment.author || {}
+                                            const commentUsername = commenter.username || commenter.handle
+                                            const commentProfileTo = commentUsername ? `/${commentUsername}` : null
+                                            const commentDisplayName = commentUsername || 'User'
+
                                             return (
                                                 <div key={comment.id || index} className="flex gap-4 items-start w-full">
                                                     <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-neutral-800 flex items-center justify-center text-sm font-bold text-gray-600 dark:text-gray-300 shrink-0 border border-gray-200 dark:border-neutral-700 overflow-hidden">
-                                                        {comment.user?.avatarUrl ? (
-                                                            <img src={comment.user.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                                                        {commenter.avatarUrl ? (
+                                                            <img src={commenter.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
                                                         ) : (
-                                                            comment.user?.username ? comment.user.username.charAt(0).toUpperCase() : 'U'
+                                                            commentDisplayName.charAt(0).toUpperCase()
                                                         )}
                                                     </div>
                                                     <div className="flex-1 min-w-0 bg-gray-50 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-lg p-4 break-words transition-colors">
                                                         <div className="flex items-center gap-3 mb-2 flex-wrap">
-                                                            <span className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                                                                {comment.user?.username || 'User'}
-                                                            </span>
+                                                            {commentProfileTo ? (
+                                                                <Link
+                                                                    to={commentProfileTo}
+                                                                    className="text-sm font-bold text-gray-900 dark:text-white hover:text-accent truncate transition-colors"
+                                                                >
+                                                                    {commentDisplayName}
+                                                                </Link>
+                                                            ) : (
+                                                                <span className="text-sm font-bold text-gray-900 dark:text-white truncate">
+                                                                    {commentDisplayName}
+                                                                </span>
+                                                            )}
 
                                                             {isProjectAuthorComment && (
                                                                 <span className="bg-accent/10 text-accent border border-accent/20 px-1.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider shrink-0">

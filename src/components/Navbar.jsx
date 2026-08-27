@@ -25,7 +25,7 @@ export default function Navbar({ theme, onToggle }) {
 
         <div className="ml-auto flex items-center gap-6">
           <Link to="/explore" className="text-sm font-medium text-gray-400 hover:text-white transition-colors duration-150">
-            Explore
+            Find
           </Link>
 
           <button onClick={onToggle} className="text-sm font-medium text-gray-400 hover:text-white transition-colors duration-150 pl-6 border-l border-white/10 cursor-pointer">

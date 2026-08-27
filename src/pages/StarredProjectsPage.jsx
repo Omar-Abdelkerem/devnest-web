@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { apiFetch } from '../lib/api'
+import { apiFetch, getStarCount } from '../lib/api'
 import ProjectCard from '../components/ProjectCard'
 
 export default function StarredProjectsPage() {
@@ -48,7 +48,7 @@ export default function StarredProjectsPage() {
             badges: p.isPublic === false ? ['PRIVATE'] : [],
             language: displayLanguage,
             languageColor: p.languageColor || '#2a8a7e',
-            stars: p._count?.stars || 0,
+            stars: getStarCount(p),
             author: p.user?.username || p.owner?.username || 'developer',
             authorAvatar: p.user?.avatarUrl || p.owner?.avatarUrl,
             updatedAt: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'Recently'

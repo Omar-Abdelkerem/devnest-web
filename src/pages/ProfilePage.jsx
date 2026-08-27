@@ -13,7 +13,7 @@ export default function ProfilePage() {
   const [feedback, setFeedback] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('projects')
-  const [copied, setCopied] = useState(false) // Added state for button
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if (!user) {
@@ -72,10 +72,9 @@ export default function ProfilePage() {
 
   const displayUsername = user?.username || (user?.email ? user.email.split('@')[0] : 'developer')
 
-  // BUTTON LOGIC: Copies your public /u/username link
   const handleCopyProfileLink = async () => {
     if (!displayUsername) return;
-    const shareableUrl = `${window.location.origin}/u/${displayUsername}`;
+    const shareableUrl = `${window.location.origin}/${displayUsername}`;
     try {
       await navigator.clipboard.writeText(shareableUrl);
       setCopied(true);
@@ -89,7 +88,6 @@ export default function ProfilePage() {
     return <div className="min-h-screen bg-white dark:bg-[#161616] flex items-center justify-center text-gray-400 font-mono text-sm">Loading profile...</div>
   }
 
-  // SECURE OBJECT MAPPING: Preserves the level for the sidebar UI
   const profileData = {
     name: user?.name || displayUsername,
     handle: displayUsername,
@@ -116,9 +114,10 @@ export default function ProfilePage() {
       description: p.description || '',
       tags: p.tags || [],
       badges: p.isPublic === false ? ['PRIVATE'] : [],
+      languages: p.languages || (p.language ? [{ name: p.language }] : []),
       language: p.language || (p.languages && p.languages.length > 0 ? (typeof p.languages[0] === 'string' ? p.languages[0] : p.languages[0].name) : null) || 'Code',
       languageColor: p.languageColor || '#2a8a7e',
-      stars: p._count?.stars || 0,
+      stars: p._count?.stars ?? (Array.isArray(p.stars) ? p.stars.length : p.stars) ?? 0,
       forks: p.forks || 0,
       updatedAt: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'Recently',
       author: displayUsername,
@@ -138,8 +137,6 @@ export default function ProfilePage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 dark:border-white/10 mb-6">
           <ProfileTabs projectCount={mappedProjects.length} activeTab={activeTab} onTabChange={setActiveTab} />
           <div className="hidden sm:flex items-center gap-3 mb-2">
-
-            {/* NEW COPY LINK BUTTON */}
             <button
               onClick={handleCopyProfileLink}
               className="flex items-center gap-2 bg-gray-50 dark:bg-neutral-900 hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-neutral-700 text-sm font-semibold px-4 py-1.5 rounded-md transition-colors shadow-sm cursor-pointer"
@@ -157,7 +154,8 @@ export default function ProfilePage() {
               )}
             </button>
 
-            <Link to="/starred" className="flex items-center gap-2 bg-gray-50 dark:bg-neutral-900 hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-neutral-700 text-sm font-semibold px-4 py-1.5 rounded-md transition-colors shadow-sm">★ Stars</Link>
+            {/* FIX: Changed button text to "★ Starred" */}
+            <Link to="/starred" className="flex items-center gap-2 bg-gray-50 dark:bg-neutral-900 hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-neutral-700 text-sm font-semibold px-4 py-1.5 rounded-md transition-colors shadow-sm">★ Starred</Link>
             <Link to="/projects/new" className="flex items-center gap-2 bg-accent hover:bg-accent-light text-white text-sm font-semibold px-4 py-1.5 rounded-md transition-colors shadow-sm"><svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></svg>New Project</Link>
           </div>
         </div>
@@ -183,7 +181,7 @@ export default function ProfilePage() {
                   </div>
                   <div className="flex-1">
                     <div className="flex justify-between items-center mb-1">
-                      <Link to={`/u/${item.author?.username}`} className="font-bold text-gray-900 dark:text-gray-100 hover:text-accent transition-colors">{item.author?.username || 'Unknown User'}</Link>
+                      <Link to={`/${item.author?.username}`} className="font-bold text-gray-900 dark:text-gray-100 hover:text-accent transition-colors">{item.author?.username || 'Unknown User'}</Link>
                       <div className="flex items-center gap-3">
                         <span className="text-xs font-mono text-gray-500">{item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'Recently'}</span>
                         <button onClick={() => handleDeleteFeedback(item.id)} className="text-xs font-bold text-red-500 hover:text-red-600 transition-colors cursor-pointer">Delete</button>

@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import ProfileSidebar from '../components/ProfileSidebar'
 import ProfileTabs from '../components/ProfileTabs'
 import ProjectGrid from '../components/ProjectGrid'
-import { apiFetch } from '../lib/api'
+import { apiFetch, getStarCount } from '../lib/api'
 
 export default function PublicProfilePage() {
     const { username } = useParams()
@@ -22,7 +22,16 @@ export default function PublicProfilePage() {
     const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false)
 
     useEffect(() => {
+        let cancelled = false
+
         async function fetchPublicData() {
+            setIsLoading(true)
+            setError(null)
+            setProfileUser(null)
+            setProjects([])
+            setSkills([])
+            setFeedback([])
+
             try {
                 const [userRes, projectsRes, skillsRes, feedbackRes] = await Promise.all([
                     apiFetch(`/api/v1/user/${username}`),
@@ -31,18 +40,18 @@ export default function PublicProfilePage() {
                     apiFetch(`/api/v1/feedback/user/${username}`)
                 ])
 
+                if (cancelled) return
+
                 if (!userRes.ok) {
                     setError(`Could not find a user with the handle @${username}.`)
-                    setIsLoading(false)
                     return
                 }
 
                 const userData = await userRes.json()
                 const fetchedUser = userData.user || userData.data?.user || userData.data || userData
 
-                if (!fetchedUser) {
+                if (!fetchedUser || (!fetchedUser.id && !fetchedUser.username && !fetchedUser.handle)) {
                     setError(`Could not find a user with the handle @${username}.`)
-                    setIsLoading(false)
                     return
                 }
 
@@ -50,32 +59,40 @@ export default function PublicProfilePage() {
 
                 if (projectsRes.ok) {
                     const projectsData = await projectsRes.json()
-                    setProjects(Array.isArray(projectsData) ? projectsData : (projectsData.data || projectsData.projects || []))
-                } else {
-                    console.error("Backend rejected the projects fetch. Check your backend auth middleware!");
+                    const list = Array.isArray(projectsData)
+                        ? projectsData
+                        : (projectsData.data || projectsData.projects || [])
+                    setProjects(Array.isArray(list) ? list : [])
                 }
 
                 if (skillsRes.ok) {
                     const skillsData = await skillsRes.json()
-                    setSkills(Array.isArray(skillsData) ? skillsData : (skillsData.data || skillsData.skills || []))
-                } else {
-                    console.error("Backend rejected the skills fetch. Check your backend auth middleware!");
+                    const list = Array.isArray(skillsData)
+                        ? skillsData
+                        : (skillsData.data || skillsData.skills || [])
+                    setSkills(Array.isArray(list) ? list : [])
                 }
 
                 if (feedbackRes.ok) {
                     const feedbackData = await feedbackRes.json()
-                    setFeedback(Array.isArray(feedbackData) ? feedbackData : [])
+                    const list = Array.isArray(feedbackData)
+                        ? feedbackData
+                        : (feedbackData.data || feedbackData.feedback || [])
+                    setFeedback(Array.isArray(list) ? list : [])
                 }
 
             } catch (err) {
+                if (cancelled) return
                 console.error('Failed to fetch public profile:', err)
                 setError('Failed to load profile due to a network error.')
             } finally {
-                setIsLoading(false)
+                if (!cancelled) setIsLoading(false)
             }
         }
 
-        fetchPublicData()
+        if (username) fetchPublicData()
+
+        return () => { cancelled = true }
     }, [username])
 
     const handlePostFeedback = async (e) => {
@@ -94,7 +111,16 @@ export default function PublicProfilePage() {
 
             if (res.ok) {
                 const createdFeedback = await res.json()
-                setFeedback([createdFeedback, ...feedback])
+                const created = createdFeedback.data || createdFeedback.feedback || createdFeedback
+                if (!created.author && currentUser) {
+                    created.author = {
+                        id: currentUser.id,
+                        username: currentUser.username,
+                        avatarUrl: currentUser.avatarUrl,
+                    }
+                    created.authorId = created.authorId || currentUser.id
+                }
+                setFeedback([created, ...feedback])
                 setNewFeedback('')
             }
         } catch (err) {
@@ -106,18 +132,12 @@ export default function PublicProfilePage() {
 
     const handleDeleteFeedback = async (feedbackId) => {
         if (!window.confirm("Are you sure you want to remove this feedback?")) return;
-
         const previousFeedback = [...feedback];
         setFeedback(feedback.filter(f => f.id !== feedbackId));
-
         try {
             const res = await apiFetch(`/api/v1/feedback/${feedbackId}`, { method: 'DELETE' })
-            if (!res.ok) {
-                setFeedback(previousFeedback);
-            }
-        } catch (err) {
-            setFeedback(previousFeedback);
-        }
+            if (!res.ok) { setFeedback(previousFeedback); }
+        } catch (err) { setFeedback(previousFeedback); }
     }
 
     if (isLoading) {
@@ -143,28 +163,30 @@ export default function PublicProfilePage() {
         )
     }
 
-    const handle = profileUser.username || username
+    const handle = profileUser.username || profileUser.handle || username
     const mappedSkills = skills.map(s => {
         if (typeof s === 'string') return { name: s, level: '' };
         return { name: s?.name || s?.title || '', level: s?.level || '' };
     }).filter(s => s.name);
 
-    console.log("RAW SKILLS FROM API:", skills);
-    console.log("MAPPED SKILLS FOR SIDEBAR:", mappedSkills);
-    // FIXED: Uses the exact same object mapping logic as your private ProfilePage.jsx
+    let links = profileUser.links || []
+    if (typeof links === 'string') {
+        try { links = JSON.parse(links) } catch { links = [] }
+    }
+    if (!Array.isArray(links)) links = []
+
     const profileData = {
         name: profileUser.name || handle,
         handle,
         bio: profileUser.bio,
         about: profileUser.about,
         avatarUrl: profileUser.avatarUrl,
-        links: profileUser.links || [],
-        followers: profileUser._count?.followers || profileUser.followers || 0,
-        following: profileUser._count?.following || profileUser.following || 0,
+        links,
+        followers: profileUser._count?.followers || (typeof profileUser.followers === 'number' ? profileUser.followers : 0),
+        following: profileUser._count?.following || (typeof profileUser.following === 'number' ? profileUser.following : 0),
         skills: mappedSkills,
     }
 
-    // FIXED: Uses the exact same comprehensive mapping logic as your private ProfilePage.jsx
     const mappedProjects = projects.map(p => {
         if (!p) return null;
         return {
@@ -173,9 +195,10 @@ export default function PublicProfilePage() {
             description: p.description || '',
             tags: p.tags || [],
             badges: p.isPublic === false ? ['PRIVATE'] : [],
+            languages: p.languages || (p.language ? [{ name: p.language }] : []),
             language: p.language || (p.languages && p.languages.length > 0 ? (typeof p.languages[0] === 'string' ? p.languages[0] : p.languages[0].name) : null) || 'Code',
             languageColor: p.languageColor || '#2a8a7e',
-            stars: p._count?.stars || 0,
+            stars: getStarCount(p),
             forks: p.forks || 0,
             updatedAt: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'Recently',
             author: handle,
@@ -194,11 +217,7 @@ export default function PublicProfilePage() {
             <ProfileSidebar user={profileData} isEmpty={false} isPublicView={true} />
 
             <div className="flex-1 min-w-0">
-                <ProfileTabs
-                    projectCount={mappedProjects.length}
-                    activeTab={activeTab}
-                    onTabChange={setActiveTab}
-                />
+                <ProfileTabs projectCount={mappedProjects.length} activeTab={activeTab} onTabChange={setActiveTab} />
 
                 {activeTab === 'projects' && (
                     mappedProjects.length > 0 ? (
@@ -214,7 +233,6 @@ export default function PublicProfilePage() {
 
                 {activeTab === 'feedback' && (
                     <div className="flex flex-col gap-6 mt-6">
-                        {/* Leave Feedback Form */}
                         {currentUser && !isOwnProfile && (
                             <form onSubmit={handlePostFeedback} className="bg-gray-50 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-xl p-5 flex flex-col gap-3 shadow-sm">
                                 <label className="text-sm font-semibold text-gray-900 dark:text-gray-100">Leave public feedback for @{username}</label>
@@ -242,22 +260,28 @@ export default function PublicProfilePage() {
                                 No feedback received yet.
                             </div>
                         ) : (
-                            feedback.map((item) => {
+                            feedback.map((item, index) => {
                                 const canDeleteFeedback = currentUser && (currentUser.id === item.authorId || currentUser.id === profileUser.id);
+                                const authorName = item.author?.username || item.user?.username || 'Unknown User'
+                                const authorTo = item.author?.username || item.user?.username
                                 return (
-                                    <div key={item.id} className="bg-gray-50 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-lg p-5 flex gap-4">
+                                    <div key={item.id || index} className="bg-gray-50 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-lg p-5 flex gap-4">
                                         <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-neutral-800 flex items-center justify-center text-sm font-bold text-gray-600 dark:text-gray-300 shrink-0 overflow-hidden border border-gray-300 dark:border-neutral-700">
                                             {item.author?.avatarUrl ? (
-                                                <img src={item.author.avatarUrl} alt={item.author.username} className="w-full h-full object-cover" />
+                                                <img src={item.author.avatarUrl} alt={authorName} className="w-full h-full object-cover" />
                                             ) : (
-                                                item.author?.username ? item.author.username.charAt(0).toUpperCase() : 'U'
+                                                authorName.charAt(0).toUpperCase()
                                             )}
                                         </div>
                                         <div className="flex-1">
                                             <div className="flex justify-between items-center mb-1">
-                                                <Link to={`/u/${item.author?.username}`} className="font-bold text-gray-900 dark:text-gray-100 hover:text-accent transition-colors">
-                                                    {item.author?.username || 'Unknown User'}
-                                                </Link>
+                                                {authorTo ? (
+                                                    <Link to={`/${authorTo}`} className="font-bold text-gray-900 dark:text-gray-100 hover:text-accent transition-colors">
+                                                        {authorName}
+                                                    </Link>
+                                                ) : (
+                                                    <span className="font-bold text-gray-900 dark:text-gray-100">{authorName}</span>
+                                                )}
                                                 <div className="flex items-center gap-3">
                                                     <span className="text-xs font-mono text-gray-500">
                                                         {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'Recently'}

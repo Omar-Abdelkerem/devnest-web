@@ -38,9 +38,12 @@
  */
 @theme {
   /* ── Colours ──────────────────────────────────────────────── */
-  --color-accent:       #2a8a7e;   /* deep desaturated teal — primary accent */
-  --color-accent-light: #34a899;   /* brighter — hover states */
-  --color-accent-dark:  #1e6b61;   /* darker — pressed/active states */
+  --color-accent: #2a8a7e;
+  /* deep desaturated teal — primary accent */
+  --color-accent-light: #34a899;
+  /* brighter — hover states */
+  --color-accent-dark: #1e6b61;
+  /* darker — pressed/active states */
 
   /* ── Typography ───────────────────────────────────────────── */
   --font-family-sans: 'Inter', system-ui, sans-serif;
@@ -53,4 +56,16 @@
  */
 html {
   scroll-behavior: smooth;
+}
+
+body,
+html {
+  width: 100%;
+  overflow-x: hidden;
+  background-color: var(--color-bg, white);
+}
+
+.dark body,
+.dark html {
+  background-color: #161616;
 }

@@ -48,7 +48,26 @@ function projectAuthor(project) {
 
 function profilePath(slug) {
   if (!slug) return null
-  return `/u/${encodeURIComponent(slug)}`
+  return `/${encodeURIComponent(slug)}`
+}
+
+function getStarCount(project) {
+  if (!project) return 0
+
+  const nested = project._count
+  const candidates = [
+    nested?.stars,
+    nested?.Star,
+    project.starsCount,
+    project.starCount,
+    Array.isArray(project.stars) ? project.stars.length : project.stars,
+  ]
+
+  for (const value of candidates) {
+    const n = Number(value)
+    if (Number.isFinite(n) && n >= 0) return n
+  }
+  return 0
 }
 
 export {
@@ -56,4 +75,5 @@ export {
   request as apiFetch,
   projectAuthor as getProjectAuthor,
   profilePath as authorProfilePath,
+  getStarCount,
 }
