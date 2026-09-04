@@ -9,7 +9,7 @@ export default function Hero() {
   useEffect(() => {
     async function fetchFeatured() {
       try {
-        const response = await apiFetch('/api/v1/projects')
+        const response = await apiFetch('/api/v1/projects/featured')
 
         if (response.ok) {
           const data = await response.json()

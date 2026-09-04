@@ -10,23 +10,19 @@ export default function HomePage() {
     useEffect(() => {
         async function fetchFeaturedProject() {
             try {
-                const response = await apiFetch('/api/v1/projects')
+                const response = await apiFetch('/api/v1/projects/featured')
 
                 if (response.ok) {
-                    const data = await response.json()
-                    const projects = Array.isArray(data) ? data : (data.data || data.projects || [])
+                    const projects = await response.json()
 
-                    // Filter to ONLY public projects
-                    const publicProjects = projects.filter(p => p.isPublic !== false)
-
-                    if (publicProjects.length > 0) {
-                        // Pick a completely random project from the public list!
-                        const randomIndex = Math.floor(Math.random() * publicProjects.length)
-                        setFeaturedProject(publicProjects[randomIndex])
+                    if (projects.length > 0) {
+                        // Pick a random project from the (at most 3) featured results
+                        const randomIndex = Math.floor(Math.random() * projects.length)
+                        setFeaturedProject(projects[randomIndex])
                     }
                 }
             } catch (err) {
-                console.error('Failed to fetch public feed:', err)
+                console.error('Failed to fetch featured projects:', err)
             } finally {
                 setIsLoading(false)
             }
