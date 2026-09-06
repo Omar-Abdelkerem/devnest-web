@@ -161,10 +161,10 @@ export default function ProjectDetailsPage() {
                         <span className="text-sm text-gray-600 dark:text-gray-500">Built by</span>
                         {authorTo ? (
                             <Link
-                                to={`/u/${project.owner?.username || project.user?.username || authorSlug}`}
+                                to={authorTo}
                                 className="text-sm font-bold text-accent hover:underline"
                             >
-                                @{project.owner?.username || project.user?.username || authorSlug}
+                                @{authorSlug}
                             </Link>
                         ) : (
                             <span className="text-sm font-bold text-accent">@{authorName || 'developer'}</span>
