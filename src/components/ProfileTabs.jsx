@@ -7,7 +7,11 @@ export default function ProfileTabs({ projectCount = 0, activeTab = 'projects', 
   ]
 
   return (
-    <nav role="tablist" aria-label="Profile sections" className="flex items-center gap-7">
+    <div
+      role="tablist"
+      aria-label="Profile sections"
+      className="inline-flex items-center gap-1 p-1 rounded-full glass-panel"
+    >
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id
         return (
@@ -17,28 +21,34 @@ export default function ProfileTabs({ projectCount = 0, activeTab = 'projects', 
             role="tab"
             aria-selected={isActive}
             onClick={() => onTabChange?.(tab.id)}
-            className={`relative flex items-center gap-2 pb-3 text-sm font-semibold transition-colors cursor-pointer ${
+            className={`relative z-10 inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-colors cursor-pointer ${
               isActive
                 ? 'text-slate-900 dark:text-white'
                 : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
-            <span>{tab.label}</span>
-            {tab.count !== null && (
-              <span className="bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-white/[0.08] text-xs font-mono py-0.5 px-2 rounded-full">
-                {tab.count}
-              </span>
-            )}
             {isActive && (
               <motion.span
                 layoutId="profileTab"
-                transition={{ type: 'spring', stiffness: 450, damping: 34 }}
-                className="absolute inset-x-0 -bottom-px h-0.5 bg-accent dark:bg-accent-light rounded-full"
+                transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                className="absolute inset-0 -z-10 rounded-full bg-white dark:bg-white/[0.11] border border-slate-200/80 dark:border-accent-light/35 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.3),0_4px_14px_-4px_rgba(42,138,126,0.3)]"
               />
+            )}
+            <span>{tab.label}</span>
+            {tab.count !== null && (
+              <span
+                className={`text-[11px] font-mono py-0.2 px-2 rounded-full border ${
+                  isActive
+                    ? 'bg-accent/15 text-accent dark:text-accent-light border-accent/30'
+                    : 'bg-slate-100 dark:bg-white/[0.05] text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/[0.08]'
+                }`}
+              >
+                {tab.count}
+              </span>
             )}
           </button>
         )
       })}
-    </nav>
+    </div>
   )
 }
