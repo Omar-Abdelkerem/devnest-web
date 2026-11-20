@@ -1,12 +1,4 @@
-/**
- * ProjectGrid.jsx — Renders a grid of ProjectCard components
- *
- * Upgraded to support auto-fetching. 
- * If no projects are passed as a prop, it assumes it is on the landing page
- * and fetches the latest public projects from the backend.
- */
-
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import ProjectCard from './ProjectCard'
 import { apiFetch, getProjectAuthor, getStarCount } from '../lib/api'
 
@@ -16,45 +8,78 @@ export default function ProjectGrid({ projects = null }) {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    // If an array was explicitly passed in (like from ProfilePage), 
-    // skip the global fetch. We only fetch if projects is null.
     if (projects !== null) return
 
+    let cancelled = false
     async function fetchGlobalProjects() {
       setIsLoading(true)
       try {
         const response = await apiFetch('/api/v1/projects')
-
+        if (cancelled) return
         if (response.ok) {
           const data = await response.json()
           setFetchedProjects(Array.isArray(data) ? data : [])
         } else {
           setError('Failed to load the public project feed.')
         }
-      } catch (err) {
-        console.error('Project feed error:', err)
-        setError('Could not connect to the server.')
+      } catch {
+        if (!cancelled) setError('Could not connect to the server.')
       } finally {
-        setIsLoading(false)
+        if (!cancelled) setIsLoading(false)
       }
     }
 
     fetchGlobalProjects()
+    return () => {
+      cancelled = true
+    }
   }, [projects])
 
-  // Decide which data source to use: the props, or our internal fetch
   const displayProjects = projects !== null ? projects : fetchedProjects
 
-  // Loading state (only shows on the landing page when auto-fetching)
+  const mappedProjects = useMemo(
+    () =>
+      displayProjects.map((p) => {
+        if (p.repo) return p
+
+        const author = getProjectAuthor(p)
+        return {
+          id: p.id,
+          repo: p.title || p.name || 'Untitled',
+          description: p.description,
+          projectimgUrl: p.projectimgUrl || null,
+          links: p.links || [],
+          badges: p.isPublic === false ? ['PRIVATE'] : [],
+          languages: p.languages || (p.language ? [p.language] : []),
+          language: p.language || 'Code',
+          languageColor: p.languageColor || '#2a8a7e',
+          stars: getStarCount(p),
+          _count: p._count,
+          updatedAt: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'Recently',
+          author: author.name,
+          authorUsername: author.slug,
+          authorHandle: author.slug,
+          authorAvatar: author.avatar,
+          owner: p.owner || p.user,
+          user: p.user || p.owner,
+        }
+      }),
+    [displayProjects],
+  )
+
   if (projects === null && isLoading) {
     return (
-      <div className="py-12 text-center text-sm font-mono text-gray-500">
-        Loading public feed...
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
+        {[0, 1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="h-56 rounded-xl border border-gray-200 dark:border-neutral-800 bg-gray-100 dark:bg-[#1a1a1a] animate-pulse"
+          />
+        ))}
       </div>
     )
   }
 
-  // Error state
   if (error) {
     return (
       <div className="py-12 text-center text-sm font-mono text-red-500">
@@ -63,40 +88,18 @@ export default function ProjectGrid({ projects = null }) {
     )
   }
 
-  // If there are zero projects in the database yet, just render nothing
-  if (displayProjects.length === 0) return null
-
-  // We map the data to ensure the backend JSON keys match what ProjectCard expects.
-  // If the data came from ProfilePage, it already has 'repo' set, so we don't map it twice.
-  const mappedProjects = displayProjects.map((p) => {
-    if (p.repo) return p
-
-    const author = getProjectAuthor(p)
-    return {
-      id: p.id,
-      repo: p.title || p.name || 'Untitled',
-      description: p.description,
-      tags: p.tags || [],
-      badges: p.isPublic ? [] : ['PRIVATE'],
-      language: p.language || 'Code',
-      languageColor: p.languageColor || '#dea584',
-      stars: getStarCount(p),
-      _count: p._count,
-      forks: p.forks || 0,
-      updatedAt: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'Recently',
-      author: author.name,
-      authorUsername: author.slug,
-      authorHandle: author.slug,
-      authorAvatar: author.avatar,
-      owner: p.owner || p.user,
-      user: p.user || p.owner,
-    }
-  })
+  if (mappedProjects.length === 0) return null
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
       {mappedProjects.map((project, index) => (
-        <ProjectCard key={project.id || index} project={project} />
+        <div
+          key={project.id || index}
+          className="animate-fade-up"
+          style={{ animationDelay: `${Math.min(index * 55, 330)}ms` }}
+        >
+          <ProjectCard project={project} />
+        </div>
       ))}
     </div>
   )

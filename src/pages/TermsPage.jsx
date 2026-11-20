@@ -1,3 +1,5 @@
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
+
 function Section({ title, children }) {
   return (
     <>
@@ -13,6 +15,7 @@ function Section({ title, children }) {
 }
 
 export default function TermsPage() {
+  useDocumentTitle('Terms of Service', 'Terms governing the use of DevNest developer portfolio platform.')
   return (
     <div className="min-h-screen bg-white dark:bg-[#161616] text-gray-900 dark:text-gray-100 transition-colors">
       {/* Header */}

@@ -1,53 +1,53 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import { apiFetch } from '../lib/api';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
+import { apiFetch } from '../lib/api'
 
-const AuthContext = createContext();
+const AuthContext = createContext(null)
 
-function AuthProvider({ children }) {
-    const [user, setUser] = useState(null);
-    const [isAuthLoading, setIsAuthLoading] = useState(true);
-
-    useEffect(() => {
-        async function checkSession() {
-            try {
-                const response = await apiFetch('/api/v1/user/me');
-
-                if (response.ok) {
-                    const data = await response.json();
-
-                    let actualUser = data;
-                    if (data.user) {
-                        actualUser = data.user;
-                    } else if (data.data?.user) {
-                        actualUser = data.data.user;
-                    } else if (data.data) {
-                        actualUser = data.data;
-                    }
-
-                    setUser(actualUser);
-                } else {
-                    setUser(null);
-                }
-            } catch (error) {
-                console.error("Session check failed:", error);
-                setUser(null);
-            } finally {
-                setIsAuthLoading(false);
-            }
-        }
-
-        checkSession();
-    }, []);
-
-    return (
-        <AuthContext.Provider value={{ user, setUser, isAuthLoading }}>
-            {children}
-        </AuthContext.Provider>
-    );
+async function fetchCurrentUser() {
+  try {
+    const response = await apiFetch('/api/v1/user/me', { skipCache: true })
+    if (response.ok) {
+      const data = await response.json()
+      return data.user || data.data?.user || data.data || data
+    }
+    return null
+  } catch {
+    return null
+  }
 }
 
-function useAuth() {
-    return useContext(AuthContext);
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null)
+  const [isAuthLoading, setIsAuthLoading] = useState(true)
+
+  const refreshUser = useCallback(async () => {
+    const actualUser = await fetchCurrentUser()
+    setUser(actualUser)
+    setIsAuthLoading(false)
+    return actualUser
+  }, [])
+
+  useEffect(() => {
+    let active = true
+    fetchCurrentUser().then((actualUser) => {
+      if (!active) return
+      setUser(actualUser)
+      setIsAuthLoading(false)
+    })
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const value = useMemo(
+    () => ({ user, setUser, isAuthLoading, refreshUser }),
+    [user, isAuthLoading, refreshUser],
+  )
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
-export { AuthProvider, useAuth };
+// eslint-disable-next-line react-refresh/only-export-components
+export function useAuth() {
+  return useContext(AuthContext)
+}

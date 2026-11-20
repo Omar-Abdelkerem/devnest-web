@@ -1,3 +1,5 @@
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
+
 function Badge({ children }) {
   return (
     <span className="inline-flex items-center text-xs font-mono px-2.5 py-1 rounded bg-gray-100 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700 text-gray-600 dark:text-gray-400">
@@ -33,6 +35,7 @@ function EndpointRow({ method, path, auth, desc }) {
 }
 
 export default function ApiDocsPage() {
+  useDocumentTitle('API Documentation', 'REST API reference for the DevNest developer portfolio backend.')
   return (
     <div className="min-h-screen bg-white dark:bg-[#161616] text-gray-900 dark:text-gray-100 transition-colors">
       {/* Header */}

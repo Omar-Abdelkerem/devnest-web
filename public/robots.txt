@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Allow: /explore
+Allow: /about
+Allow: /api-docs
+Allow: /privacy
+Allow: /terms
+Disallow: /settings
+Disallow: /projects/new
+Disallow: /starred
+Disallow: /login
+Disallow: /register
+
+Sitemap: https://devnest-web-xi.vercel.app/sitemap.xml

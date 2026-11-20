@@ -5,22 +5,41 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- SEO -->
+    <!-- Primary SEO -->
     <title>DevNest — Your engineering work, in one place.</title>
     <meta
       name="description"
-      content="DevNest is a portfolio platform for engineers — show what you've built, get real feedback from peers, and build a permanent record of your technical work."
+      content="DevNest is a portfolio platform for engineers — showcase projects with cover photos and live links, get peer feedback, and build a permanent record of your technical work."
     />
 
-    <!--
-      Inline script: apply dark/light class to <html> BEFORE the page renders.
-      This prevents the "flash of wrong theme" that would occur if we waited
-      for React to hydrate before applying the class.
-    -->
+    <!-- Open Graph / Social Previews -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="DevNest" />
+    <meta property="og:title" content="DevNest — Your engineering work, in one place." />
+    <meta
+      property="og:description"
+      content="Showcase what you've built, collect peer feedback, and share an interactive developer portfolio."
+    />
+    <meta property="og:image" content="https://devnest-web-xi.vercel.app/favicon.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="DevNest — Developer Portfolio Platform" />
+    <meta
+      name="twitter:description"
+      content="Showcase what you've built, collect peer feedback, and share an interactive developer portfolio."
+    />
+
+    <!-- Non-blocking Font Loading with preconnect + display=swap -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    />
+
+    <!-- Prevent theme flash before React mounts -->
     <script>
       ;(function () {
         var stored = localStorage.getItem('devnest-theme')
-        // Default to dark if nothing stored
         if (stored !== 'light') {
           document.documentElement.classList.add('dark')
         }

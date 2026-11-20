@@ -1,4 +1,7 @@
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
+
 export default function AboutPage() {
+  useDocumentTitle('About DevNest', 'Learn about DevNest, an open portfolio platform built for software engineers.')
   return (
     <div className="min-h-screen bg-white dark:bg-[#161616] text-gray-900 dark:text-gray-100 transition-colors">
       {/* Hero */}
@@ -109,10 +112,10 @@ export default function AboutPage() {
           free to use. If you have ideas, bug reports, or want to contribute, the
           best place to start is the{' '}
           <a
-            href="https://github.com"
+            href="https://github.com/Omar-Abdelkerem/DevNest"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-accent hover:underline"
+            className="text-accent dark:text-accent-light hover:underline"
           >
             GitHub repository
           </a>
