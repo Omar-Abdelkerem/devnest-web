@@ -29,10 +29,10 @@ const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
 function PageFallback() {
   return (
-    <div className="flex-1 flex items-center justify-center py-24 bg-white dark:bg-[#161616]">
-      <div className="flex items-center gap-3 text-sm font-mono text-gray-500 dark:text-gray-400">
-        <span className="w-2.5 h-2.5 rounded-full bg-accent animate-ping" />
-        Loading...
+    <div className="flex-1 flex items-center justify-center py-24 bg-[#f8fafc] dark:bg-[#07070b]">
+      <div className="flex items-center gap-3 px-4 py-2 rounded-full glass-panel text-xs font-mono text-slate-600 dark:text-slate-300">
+        <span className="w-2 h-2 rounded-full bg-accent-light animate-ping" />
+        Loading workspace...
       </div>
     </div>
   )
@@ -68,11 +68,11 @@ function AppRoutes({ theme, toggleTheme }) {
   const location = useLocation()
 
   return (
-    <div className="font-sans antialiased min-h-screen w-full overflow-x-hidden flex flex-col bg-white dark:bg-[#161616]">
+    <div className="font-sans antialiased min-h-screen w-full overflow-x-hidden flex flex-col bg-[#f8fafc] dark:bg-[#07070b] text-slate-900 dark:text-slate-100 selection:bg-accent/30 selection:text-white">
       <SmoothScroll />
       <Navbar theme={theme} onToggle={toggleTheme} />
 
-      <main className="flex-1 flex flex-col w-full">
+      <main className="flex-1 flex flex-col w-full relative">
         <Suspense fallback={<PageFallback />}>
           <AnimatePresence mode="wait">
             <motion.div
@@ -80,7 +80,7 @@ function AppRoutes({ theme, toggleTheme }) {
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
               className="flex-1 flex flex-col w-full"
             >
               <Routes location={location}>

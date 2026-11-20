@@ -5,6 +5,8 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import ProfileSidebar from '../components/ProfileSidebar'
 import ProfileTabs from '../components/ProfileTabs'
 import ProjectGrid from '../components/ProjectGrid'
+import VolumetricBackground from '../components/VolumetricBackground'
+import GlassIconTile from '../components/GlassIconTile'
 import { apiFetch, getStarCount, parseApiError } from '../lib/api'
 
 export default function PublicProfilePage() {
@@ -204,7 +206,7 @@ export default function PublicProfilePage() {
                 : p.languages[0].name
               : null) ||
             'Code',
-          languageColor: p.languageColor || '#2a8a7e',
+          languageColor: p.languageColor || '#3cd2bf',
           stars: getStarCount(p),
           _count: p._count,
           updatedAt: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'Recently',
@@ -221,10 +223,10 @@ export default function PublicProfilePage() {
   if (isLoading) {
     return (
       <div className="max-w-6xl mx-auto px-6 py-12 flex flex-col lg:flex-row gap-12 w-full">
-        <div className="w-full lg:w-80 h-96 rounded-2xl bg-gray-100 dark:bg-[#1a1a1a] animate-pulse shrink-0" />
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="w-full lg:w-80 h-96 rounded-3xl glass-panel animate-pulse shrink-0" />
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-56 rounded-xl bg-gray-100 dark:bg-[#1a1a1a] animate-pulse" />
+            <div key={i} className="h-64 rounded-2xl glass-panel animate-pulse" />
           ))}
         </div>
       </div>
@@ -233,17 +235,27 @@ export default function PublicProfilePage() {
 
   if (error || !profileUser || !profileData) {
     return (
-      <div className="flex-1 bg-white dark:bg-[#161616] flex flex-col items-center justify-center py-20 px-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Profile Unavailable</h1>
-        <p className="text-gray-600 dark:text-gray-400 font-mono text-sm mb-8 max-w-md text-center">
-          {error || `The user @${username} does not exist, or their profile is set to private.`}
-        </p>
-        <Link
-          to="/explore"
-          className="bg-accent hover:bg-accent-light text-white px-6 py-2.5 rounded-md font-bold transition-colors shadow-sm"
-        >
-          ← Back to Explore
-        </Link>
+      <div className="relative flex-1 flex flex-col items-center justify-center py-20 px-6 overflow-hidden">
+        <VolumetricBackground variant="profile" />
+        <div className="relative z-10 glass-panel rounded-3xl p-8 max-w-md w-full text-center flex flex-col items-center">
+          <GlassIconTile size="lg" accent={true} className="mb-4">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.9" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z" />
+            </svg>
+          </GlassIconTile>
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-2">
+            Profile Unavailable
+          </h1>
+          <p className="text-slate-600 dark:text-slate-400 font-mono text-xs sm:text-sm mb-7 leading-relaxed">
+            {error || `The user @${username} does not exist, or their profile is set to private.`}
+          </p>
+          <Link
+            to="/explore"
+            className="btn-3d-pill px-6 py-2.5 rounded-full text-sm font-bold"
+          >
+            ← Back to Explore
+          </Link>
+        </div>
       </div>
     )
   }
@@ -253,130 +265,154 @@ export default function PublicProfilePage() {
   const totalStars = mappedProjects.reduce((sum, p) => sum + (Number(p.stars) || 0), 0)
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12 flex flex-col lg:flex-row gap-12 bg-white dark:bg-[#161616] w-full">
-      <ProfileSidebar
-        user={profileData}
-        isEmpty={false}
-        isPublicView={true}
-        projectCount={mappedProjects.length}
-        totalStars={totalStars}
-      />
+    <div className="relative w-full min-h-screen overflow-hidden">
+      <VolumetricBackground variant="profile" />
 
-      <div className="flex-1 min-w-0">
-        <ProfileTabs projectCount={mappedProjects.length} activeTab={activeTab} onTabChange={setActiveTab} />
+      <div className="relative z-10 max-w-6xl mx-auto px-6 py-12 flex flex-col lg:flex-row gap-12 w-full">
+        <ProfileSidebar
+          user={profileData}
+          isEmpty={false}
+          isPublicView={true}
+          projectCount={mappedProjects.length}
+          totalStars={totalStars}
+        />
 
-        {activeTab === 'projects' &&
-          (mappedProjects.length > 0 ? (
-            <div className="mt-6">
-              <ProjectGrid projects={mappedProjects} />
-            </div>
-          ) : (
-            <div className="py-12 text-center border border-dashed border-gray-300 dark:border-neutral-800 rounded-lg text-gray-600 dark:text-gray-400 mt-6 text-sm font-mono">
-              @{username} has no public projects yet.
-            </div>
-          ))}
+        <div className="flex-1 min-w-0">
+          <div className="pb-5 mb-6 border-b border-slate-200/80 dark:border-white/[0.08]">
+            <ProfileTabs
+              projectCount={mappedProjects.length}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+            />
+          </div>
 
-        {activeTab === 'feedback' && (
-          <div className="flex flex-col gap-6 mt-6">
-            {currentUser && !isOwnProfile && (
-              <form
-                onSubmit={handlePostFeedback}
-                className="bg-gray-50 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-xl p-5 flex flex-col gap-3 shadow-sm"
-              >
-                <label htmlFor="public-feedback-input" className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                  Leave public feedback for @{username}
-                </label>
-                <textarea
-                  id="public-feedback-input"
-                  value={newFeedback}
-                  onChange={(e) => setNewFeedback(e.target.value)}
-                  placeholder="Write a constructive note, review, or words of encouragement..."
-                  rows="3"
-                  maxLength={500}
-                  className="w-full bg-white dark:bg-neutral-800 border border-gray-300 dark:border-neutral-700 rounded-md p-3 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-accent resize-none"
-                />
-                {feedbackError && (
-                  <p role="alert" className="text-xs font-mono text-red-500">{feedbackError}</p>
-                )}
-                <div className="flex justify-end">
-                  <button
-                    type="submit"
-                    disabled={isSubmittingFeedback || !newFeedback.trim()}
-                    className="bg-accent hover:bg-accent-light text-white font-bold px-5 py-2 rounded-md text-sm transition-colors cursor-pointer disabled:opacity-50"
-                  >
-                    {isSubmittingFeedback ? 'Posting...' : 'Send Feedback'}
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {feedback.length === 0 ? (
-              <div className="py-12 text-center border border-dashed border-gray-300 dark:border-neutral-800 rounded-lg text-gray-600 dark:text-gray-400 text-sm font-mono">
-                No feedback received yet.
+          {activeTab === 'projects' &&
+            (mappedProjects.length > 0 ? (
+              <div className="mt-6">
+                <ProjectGrid projects={mappedProjects} />
               </div>
             ) : (
-              feedback.map((item, index) => {
-                const canDeleteFeedback =
-                  currentUser && (currentUser.id === item.authorId || currentUser.id === profileUser.id)
-                const authorName = item.author?.username || item.user?.username || 'Unknown User'
-                const authorTo = item.author?.username || item.user?.username
+              <div className="py-16 px-6 glass-panel rounded-2xl text-center flex flex-col items-center gap-3 mt-4">
+                <GlassIconTile size="lg" accent={true}>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.9" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </GlassIconTile>
+                <p className="text-sm font-mono text-slate-600 dark:text-slate-400">
+                  @{username} has no public projects yet.
+                </p>
+              </div>
+            ))}
 
-                return (
-                  <div
-                    key={item.id || index}
-                    className="bg-gray-50 dark:bg-neutral-900 border border-gray-200 dark:border-neutral-800 rounded-lg p-5 flex gap-4"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-neutral-800 flex items-center justify-center text-sm font-bold text-gray-600 dark:text-gray-300 shrink-0 overflow-hidden border border-gray-300 dark:border-neutral-700">
-                      {item.author?.avatarUrl ? (
-                        <img
-                          src={item.author.avatarUrl}
-                          alt={`${authorName} avatar`}
-                          loading="lazy"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        authorName.charAt(0).toUpperCase()
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-center mb-1 gap-2">
-                        {authorTo ? (
-                          <Link
-                            to={`/${authorTo}`}
-                            className="font-bold text-gray-900 dark:text-gray-100 hover:text-accent transition-colors truncate"
-                          >
-                            {authorName}
-                          </Link>
-                        ) : (
-                          <span className="font-bold text-gray-900 dark:text-gray-100 truncate">
-                            {authorName}
-                          </span>
-                        )}
-                        <div className="flex items-center gap-3 shrink-0">
-                          <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
-                            {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'Recently'}
-                          </span>
-                          {canDeleteFeedback && (
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteFeedback(item.id)}
-                              className="text-xs font-bold text-red-600 dark:text-red-400 hover:underline cursor-pointer"
-                            >
-                              Delete
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                      <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap mt-2">
-                        {item.content}
-                      </p>
-                    </div>
+          {activeTab === 'feedback' && (
+            <div className="flex flex-col gap-6 mt-6">
+              {currentUser && !isOwnProfile && (
+                <form
+                  onSubmit={handlePostFeedback}
+                  className="glass-panel rounded-2xl p-5 flex flex-col gap-3.5"
+                >
+                  <label htmlFor="public-feedback-input" className="text-sm font-bold text-slate-900 dark:text-white">
+                    Leave public feedback for @{username}
+                  </label>
+                  <textarea
+                    id="public-feedback-input"
+                    value={newFeedback}
+                    onChange={(e) => setNewFeedback(e.target.value)}
+                    placeholder="Write a constructive note, architecture review, or words of encouragement..."
+                    rows="3"
+                    maxLength={500}
+                    className="w-full glass-input rounded-xl p-3 text-sm resize-none"
+                  />
+                  {feedbackError && (
+                    <p role="alert" className="text-xs font-mono text-rose-500">{feedbackError}</p>
+                  )}
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      disabled={isSubmittingFeedback || !newFeedback.trim()}
+                      className="btn-3d-pill font-bold px-5 py-2 rounded-full text-xs sm:text-sm cursor-pointer disabled:opacity-50"
+                    >
+                      {isSubmittingFeedback ? 'Posting...' : 'Send Feedback'}
+                    </button>
                   </div>
-                )
-              })
-            )}
-          </div>
-        )}
+                </form>
+              )}
+
+              {feedback.length === 0 ? (
+                <div className="py-16 px-6 glass-panel rounded-2xl text-center flex flex-col items-center gap-3">
+                  <GlassIconTile size="lg" accent={true}>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.9" viewBox="0 0 24 24" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                    </svg>
+                  </GlassIconTile>
+                  <p className="text-sm font-mono text-slate-600 dark:text-slate-400">
+                    No feedback received yet.
+                  </p>
+                </div>
+              ) : (
+                feedback.map((item, index) => {
+                  const canDeleteFeedback =
+                    currentUser && (currentUser.id === item.authorId || currentUser.id === profileUser.id)
+                  const authorName = item.author?.username || item.user?.username || 'Unknown User'
+                  const authorTo = item.author?.username || item.user?.username
+
+                  return (
+                    <div
+                      key={item.id || index}
+                      className="glass-panel-interactive rounded-2xl p-5 flex gap-4"
+                    >
+                      <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-white/[0.08] flex items-center justify-center text-sm font-bold text-slate-700 dark:text-slate-200 shrink-0 overflow-hidden border border-slate-300 dark:border-white/[0.12]">
+                        {item.author?.avatarUrl ? (
+                          <img
+                            src={item.author.avatarUrl}
+                            alt={`${authorName} avatar`}
+                            loading="lazy"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          authorName.charAt(0).toUpperCase()
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-center mb-1 gap-2">
+                          {authorTo ? (
+                            <Link
+                              to={`/${authorTo}`}
+                              className="font-bold text-slate-900 dark:text-white hover:text-accent dark:hover:text-accent-light transition-colors truncate"
+                            >
+                              @{authorName}
+                            </Link>
+                          ) : (
+                            <span className="font-bold text-slate-900 dark:text-white truncate">
+                              @{authorName}
+                            </span>
+                          )}
+                          <div className="flex items-center gap-3 shrink-0">
+                            <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
+                              {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'Recently'}
+                            </span>
+                            {canDeleteFeedback && (
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteFeedback(item.id)}
+                                className="text-xs font-mono font-bold text-rose-500 hover:underline cursor-pointer"
+                              >
+                                Delete
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap mt-2 leading-relaxed">
+                          {item.content}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

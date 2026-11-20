@@ -52,7 +52,7 @@ export default function ProjectGrid({ projects = null }) {
           badges: p.isPublic === false ? ['PRIVATE'] : [],
           languages: p.languages || (p.language ? [p.language] : []),
           language: p.language || 'Code',
-          languageColor: p.languageColor || '#2a8a7e',
+          languageColor: p.languageColor || '#3cd2bf',
           stars: getStarCount(p),
           _count: p._count,
           updatedAt: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'Recently',
@@ -69,11 +69,11 @@ export default function ProjectGrid({ projects = null }) {
 
   if (projects === null && isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
         {[0, 1, 2, 3].map((i) => (
           <div
             key={i}
-            className="h-56 rounded-xl border border-gray-200 dark:border-neutral-800 bg-gray-100 dark:bg-[#1a1a1a] animate-pulse"
+            className="h-64 rounded-2xl glass-panel animate-pulse"
           />
         ))}
       </div>
@@ -82,7 +82,7 @@ export default function ProjectGrid({ projects = null }) {
 
   if (error) {
     return (
-      <div className="py-12 text-center text-sm font-mono text-red-500">
+      <div className="py-12 text-center text-sm font-mono text-rose-500 glass-panel rounded-2xl">
         {error}
       </div>
     )
@@ -91,11 +91,11 @@ export default function ProjectGrid({ projects = null }) {
   if (mappedProjects.length === 0) return null
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
       {mappedProjects.map((project, index) => (
         <div
           key={project.id || index}
-          className="animate-fade-up"
+          className="animate-fade-up h-full"
           style={{ animationDelay: `${Math.min(index * 55, 330)}ms` }}
         >
           <ProjectCard project={project} />

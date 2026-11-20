@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { apiFetch, getStarCount } from '../lib/api'
 import ProjectCard from '../components/ProjectCard'
+import VolumetricBackground from '../components/VolumetricBackground'
+import GlassIconTile from '../components/GlassIconTile'
 
 export default function StarredProjectsPage() {
   useDocumentTitle('Starred Projects', 'Projects you have starred on DevNest.')
@@ -49,7 +51,7 @@ export default function StarredProjectsPage() {
             links: p.links || [],
             badges: p.isPublic === false ? ['PRIVATE'] : [],
             language: displayLanguage,
-            languageColor: p.languageColor || '#2a8a7e',
+            languageColor: p.languageColor || '#3cd2bf',
             stars: getStarCount(p),
             author: p.user?.username || p.owner?.username || 'developer',
             authorUsername: p.user?.username || p.owner?.username || 'developer',
@@ -61,55 +63,74 @@ export default function StarredProjectsPage() {
   )
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12 lg:py-20 w-full min-h-screen bg-white dark:bg-[#161616]">
-      <div className="mb-8">
-        <Link to="/profile" className="text-sm font-mono text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-          ← Back to Profile
-        </Link>
-        <div className="mt-6 flex items-center gap-3">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Starred Projects</h1>
-          <span className="px-2.5 py-0.5 text-xs font-mono bg-gray-100 dark:bg-neutral-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-neutral-700 rounded-full">
-            {mappedProjects.length}
-          </span>
-        </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 font-mono">
-          A collection of projects you&apos;ve saved for later.
-        </p>
-      </div>
+    <div className="relative w-full min-h-screen overflow-hidden">
+      <VolumetricBackground variant="profile" />
 
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="h-56 rounded-xl bg-gray-100 dark:bg-[#1a1a1a] animate-pulse" />
-          ))}
-        </div>
-      ) : error ? (
-        <div role="alert" className="py-20 text-center text-red-500 font-mono text-sm border border-red-500/20 rounded-lg bg-red-500/5">
-          {error}
-        </div>
-      ) : mappedProjects.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {mappedProjects.map((project, idx) => (
-            <div
-              key={project.id}
-              className="animate-fade-up"
-              style={{ animationDelay: `${Math.min(idx * 55, 330)}ms` }}
-            >
-              <ProjectCard project={project} />
+      <div className="relative z-10 max-w-6xl mx-auto px-6 py-12 lg:py-18 w-full">
+        <div className="mb-10">
+          <Link to="/profile" className="btn-glass-pill text-xs font-mono px-4 py-1.5 rounded-full">
+            ← Back to Profile
+          </Link>
+          <div className="mt-6 flex items-center gap-4">
+            <GlassIconTile size="lg" accent={true}>
+              <svg className="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+            </GlassIconTile>
+            <div>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                  Starred Projects
+                </h1>
+                <span className="px-2.5 py-0.5 text-xs font-mono bg-accent/15 text-accent dark:text-accent-light border border-accent/30 rounded-full">
+                  {mappedProjects.length}
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 font-mono">
+                A curated collection of projects you&apos;ve bookmarked on DevNest.
+              </p>
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="py-20 text-center border border-dashed border-gray-300 dark:border-neutral-800 rounded-xl text-gray-600 dark:text-gray-400 text-sm font-mono bg-gray-50 dark:bg-[#1a1a1a]">
-          <div className="text-4xl mb-4 text-gray-300 dark:text-neutral-700">★</div>
-          You haven&apos;t starred any projects yet.
-          <div className="mt-4">
-            <Link to="/explore" className="text-accent dark:text-accent-light hover:underline font-semibold">
-              Explore the community
-            </Link>
           </div>
         </div>
-      )}
+
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-64 rounded-2xl glass-panel animate-pulse" />
+            ))}
+          </div>
+        ) : error ? (
+          <div role="alert" className="py-16 text-center text-rose-500 font-mono text-sm glass-panel rounded-2xl">
+            {error}
+          </div>
+        ) : mappedProjects.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {mappedProjects.map((project, idx) => (
+              <div
+                key={project.id}
+                className="animate-fade-up h-full"
+                style={{ animationDelay: `${Math.min(idx * 55, 330)}ms` }}
+              >
+                <ProjectCard project={project} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="py-20 px-6 text-center glass-panel rounded-3xl flex flex-col items-center gap-3">
+            <GlassIconTile size="lg" accent={true}>
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+            </GlassIconTile>
+            <p className="text-slate-600 dark:text-slate-400 text-sm font-mono">
+              You haven&apos;t starred any projects yet.
+            </p>
+            <Link to="/explore" className="btn-3d-pill text-xs font-bold px-5 py-2.5 rounded-full mt-2">
+              Explore the community →
+            </Link>
+          </div>
+        )}
+      </div>
     </div>
   )
 }

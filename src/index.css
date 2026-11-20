@@ -1,5 +1,5 @@
 /*
- * index.css — Clean, refined global stylesheet for DevNest (Tailwind v4)
+ * index.css — Dark-Glass + Volumetric Light Design System for DevNest (Tailwind v4)
  */
 @import "tailwindcss";
 
@@ -7,8 +7,10 @@
 
 @theme {
   --color-accent: #2a8a7e;
-  --color-accent-light: #34a899;
+  --color-accent-light: #3cd2bf;
   --color-accent-dark: #1e6b61;
+  --color-obsidian: #07070b;
+  --color-obsidian-elevated: #0c0d14;
 
   --font-family-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-family-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
@@ -22,12 +24,14 @@ body,
 html {
   width: 100%;
   overflow-x: hidden;
-  background-color: var(--color-bg, white);
+  background-color: #f8fafc;
+  color: #0f172a;
 }
 
 .dark body,
 .dark html {
-  background-color: #161616;
+  background-color: #07070b;
+  color: #f1f5f9;
 }
 
 :focus-visible {
@@ -35,7 +39,189 @@ html {
   outline-offset: 2px;
 }
 
-/* Understated, crisp entrance animation */
+/* ==========================================================================
+   Dark-Glass Surface Utilities (Resq.io / Linear / Raycast / Resend Craft)
+   ========================================================================== */
+
+.glass-panel {
+  position: relative;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.9),
+    0 10px 30px -15px rgba(15, 23, 42, 0.07);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.dark .glass-panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.065) 0%, rgba(255, 255, 255, 0.018) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.16),
+    0 20px 40px -20px rgba(0, 0, 0, 0.75);
+}
+
+.glass-panel-interactive {
+  position: relative;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.92) 100%);
+  border: 1px solid rgba(15, 23, 42, 0.09);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.9),
+    0 10px 28px -14px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition:
+    transform 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.24s ease,
+    box-shadow 0.26s ease;
+  will-change: transform;
+}
+
+.glass-panel-interactive:hover {
+  border-color: rgba(42, 138, 126, 0.45);
+  box-shadow:
+    inset 0 1px 0 0 rgba(60, 210, 191, 0.35),
+    0 18px 36px -14px rgba(42, 138, 126, 0.16);
+}
+
+.dark .glass-panel-interactive {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.085);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.16),
+    0 22px 44px -22px rgba(0, 0, 0, 0.85);
+}
+
+.dark .glass-panel-interactive:hover {
+  border-color: rgba(60, 210, 191, 0.45);
+  box-shadow:
+    inset 0 1px 0 0 rgba(60, 210, 191, 0.45),
+    0 24px 48px -18px rgba(0, 0, 0, 0.9),
+    0 0 32px -8px rgba(42, 138, 126, 0.28);
+}
+
+/* ==========================================================================
+   3D Frosted Pill Buttons (Resq.io Specular Rim + Downward Bloom)
+   ========================================================================== */
+
+.btn-3d-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(180deg, #35ab9c 0%, #217368 100%);
+  color: #ffffff;
+  border: 1px solid rgba(60, 210, 191, 0.45);
+  box-shadow:
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.42),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.35),
+    0 8px 22px -6px rgba(42, 138, 126, 0.55);
+  transition:
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.22s ease,
+    filter 0.22s ease;
+}
+
+.btn-3d-pill:hover:not(:disabled) {
+  transform: translate3d(0, -1.5px, 0);
+  filter: brightness(1.07);
+  box-shadow:
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.35),
+    0 14px 30px -6px rgba(60, 210, 191, 0.65),
+    0 0 22px -4px rgba(60, 210, 191, 0.4);
+}
+
+.btn-3d-pill:active:not(:disabled) {
+  transform: translate3d(0, 0.5px, 0) scale(0.985);
+}
+
+.btn-glass-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(241, 245, 249, 0.85) 100%);
+  color: #0f172a;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.9),
+    0 4px 12px -4px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition:
+    transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.btn-glass-pill:hover:not(:disabled) {
+  transform: translate3d(0, -1.5px, 0);
+  border-color: rgba(42, 138, 126, 0.45);
+}
+
+.dark .btn-glass-pill {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0.03) 100%);
+  color: #f1f5f9;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.22),
+    0 10px 24px -10px rgba(0, 0, 0, 0.7);
+}
+
+.dark .btn-glass-pill:hover:not(:disabled) {
+  border-color: rgba(60, 210, 191, 0.45);
+  box-shadow:
+    inset 0 1px 0 0 rgba(60, 210, 191, 0.35),
+    0 14px 28px -10px rgba(0, 0, 0, 0.85),
+    0 0 18px -6px rgba(60, 210, 191, 0.28);
+}
+
+/* ==========================================================================
+   Frosted Glass Form Inputs
+   ========================================================================== */
+
+.glass-input {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  color: #0f172a;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+}
+
+.glass-input:focus {
+  outline: none;
+  border-color: #2a8a7e;
+  box-shadow: 0 0 0 3px rgba(42, 138, 126, 0.2);
+}
+
+.dark .glass-input {
+  background-color: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+}
+
+.dark .glass-input::placeholder {
+  color: rgba(148, 163, 184, 0.55);
+}
+
+.dark .glass-input:focus {
+  background-color: rgba(255, 255, 255, 0.055);
+  border-color: rgba(60, 210, 191, 0.65);
+  box-shadow:
+    inset 0 1px 0 0 rgba(60, 210, 191, 0.2),
+    0 0 0 3px rgba(60, 210, 191, 0.16);
+}
+
+/* ==========================================================================
+   GPU-Composited Animations (Transform & Opacity only)
+   ========================================================================== */
+
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -48,43 +234,78 @@ html {
 }
 
 .animate-fade-up {
-  animation: fadeUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: fadeUp 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Clean, refined card hover — subtle lift & crisp shadow, no gimmicks */
-.project-card-interactive {
-  position: relative;
-  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
-              border-color 0.2s ease,
-              box-shadow 0.22s ease;
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translate3d(0, 0px, 0);
+  }
+  50% {
+    transform: translate3d(0, -7px, 0);
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 5.5s ease-in-out infinite;
   will-change: transform;
 }
 
-.project-card-interactive:hover {
-  transform: translate3d(0, -3px, 0);
-  box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.35);
+@keyframes starTwinkle {
+  0%, 100% {
+    opacity: 0.18;
+    transform: translate3d(0, 0, 0) scale(0.9);
+  }
+  50% {
+    opacity: 0.78;
+    transform: translate3d(0, -6px, 0) scale(1.1);
+  }
+}
+
+.animate-star {
+  animation: starTwinkle var(--star-duration, 6s) ease-in-out infinite;
+  animation-delay: var(--star-delay, 0s);
+  will-change: transform, opacity;
+}
+
+@keyframes circuitPulse {
+  from {
+    stroke-dashoffset: 320;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-circuit-pulse {
+  stroke-dasharray: 42 278;
+  animation: circuitPulse 3.6s linear infinite;
 }
 
 .skill-pill {
-  transition: transform 0.18s ease, border-color 0.18s ease;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .skill-pill:hover {
-  transform: translate3d(0, -1px, 0);
+  transform: translate3d(0, -2px, 0);
 }
 
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
-  .animate-fade-up {
-    animation: none;
+  .animate-fade-up,
+  .animate-float-slow,
+  .animate-star,
+  .animate-circuit-pulse {
+    animation: none !important;
   }
-  .project-card-interactive,
-  .project-card-interactive:hover,
+  .glass-panel-interactive,
+  .glass-panel-interactive:hover,
+  .btn-3d-pill:hover:not(:disabled),
+  .btn-glass-pill:hover:not(:disabled),
   .skill-pill:hover {
-    transform: none;
-    transition: border-color 0.15s ease;
+    transform: none !important;
   }
 }
 

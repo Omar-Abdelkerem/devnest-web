@@ -3,6 +3,8 @@ import { useNavigate, useParams, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { apiFetch, normalizeProjectLinks, parseApiError, safeExternalUrl } from '../lib/api'
+import VolumetricBackground from '../components/VolumetricBackground'
+import GlassIconTile from '../components/GlassIconTile'
 
 export default function EditProjectPage() {
   useDocumentTitle('Edit Project')
@@ -190,240 +192,263 @@ export default function EditProjectPage() {
 
   if (isFetching) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-500 font-mono text-sm">
+      <div className="min-h-screen flex items-center justify-center text-slate-500 font-mono text-sm">
         Loading project...
       </div>
     )
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-12 lg:py-20 w-full">
-      <div className="mb-8">
-        <Link to={`/project/${projectId}`} className="text-sm font-mono text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-          ← Back to project
-        </Link>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-4">Edit Project</h1>
-      </div>
+    <div className="relative w-full min-h-screen overflow-hidden">
+      <VolumetricBackground variant="profile" />
 
-      <form
-        onSubmit={handleUpdate}
-        className="flex flex-col gap-6 bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-neutral-800 p-6 md:p-8 rounded-xl shadow-sm mb-8"
-      >
-        {/* Project Cover Photo */}
-        <div className="flex flex-col gap-2">
-          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-            Project Cover Photo <span className="text-xs font-normal text-gray-500">(optional)</span>
-          </span>
-
-          {formData.projectimgUrl ? (
-            <div className="relative rounded-lg overflow-hidden border border-gray-200 dark:border-neutral-700 aspect-[16/9] bg-gray-100 dark:bg-neutral-900">
-              <img
-                src={formData.projectimgUrl}
-                alt="Project cover preview"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute top-3 right-3 flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploadingImage}
-                  className="bg-black/75 hover:bg-black text-white text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer"
-                >
-                  Change
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFormData((prev) => ({ ...prev, projectimgUrl: '' }))}
-                  className="bg-red-600/90 hover:bg-red-600 text-white text-xs font-semibold px-3 py-1.5 rounded-md cursor-pointer"
-                >
-                  Remove
-                </button>
-              </div>
+      <div className="relative z-10 max-w-2xl mx-auto px-6 py-12 lg:py-18 w-full">
+        <div className="mb-8">
+          <Link to={`/project/${projectId}`} className="btn-glass-pill text-xs font-mono px-4 py-1.5 rounded-full">
+            ← Back to project
+          </Link>
+          <div className="flex items-center gap-3.5 mt-5">
+            <GlassIconTile size="lg" accent={true}>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.9" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </GlassIconTile>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                Edit Project
+              </h1>
+              <p className="text-xs sm:text-sm font-mono text-slate-500 dark:text-slate-400">
+                Update cover visual, live deployment links, or architecture docs
+              </p>
             </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploadingImage}
-              className="flex flex-col items-center justify-center gap-2 py-8 px-4 border-2 border-dashed border-gray-300 dark:border-neutral-700 hover:border-accent dark:hover:border-accent-light rounded-lg bg-gray-50 dark:bg-neutral-900/60 transition-colors cursor-pointer disabled:opacity-50"
-            >
-              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                {isUploadingImage ? 'Uploading cover photo...' : 'Click to upload a cover photo'}
-              </span>
-              <span className="text-xs font-mono text-gray-500">
-                JPEG, PNG, WebP or GIF · Max 5 MB
-              </span>
-            </button>
-          )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            className="hidden"
-            onChange={handleImageUpload}
-          />
-          {uploadError && <p role="alert" className="text-xs font-mono text-red-500">{uploadError}</p>}
+          </div>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <label htmlFor="edit-title" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-            Project Title
-          </label>
-          <input
-            id="edit-title"
-            type="text"
-            required
-            maxLength={120}
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            className="px-3 py-2 bg-gray-50 dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 rounded-md focus:outline-none focus:ring-2 focus:ring-accent text-gray-900 dark:text-gray-100"
-          />
-        </div>
+        <form
+          onSubmit={handleUpdate}
+          className="flex flex-col gap-6 glass-panel p-6 md:p-8 rounded-3xl mb-8"
+        >
+          {/* Project Cover Photo */}
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+              Project Cover Photo <span className="font-normal text-slate-400">(optional)</span>
+            </span>
 
-        <div className="flex flex-col gap-2">
-          <label htmlFor="edit-description" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-            Short Description
-          </label>
-          <textarea
-            id="edit-description"
-            required
-            rows="2"
-            maxLength={500}
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="px-3 py-2 bg-gray-50 dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 rounded-md focus:outline-none focus:ring-2 focus:ring-accent text-gray-900 dark:text-gray-100 resize-none"
-          />
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <label htmlFor="edit-languages" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-            Languages / Stack <span className="text-xs font-normal text-gray-500">(comma separated)</span>
-          </label>
-          <input
-            id="edit-languages"
-            type="text"
-            placeholder="Rust, Go, TypeScript"
-            value={formData.languages}
-            onChange={(e) => setFormData({ ...formData, languages: e.target.value })}
-            className="px-3 py-2 bg-gray-50 dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 rounded-md focus:outline-none focus:ring-2 focus:ring-accent text-gray-900 dark:text-gray-100"
-          />
-        </div>
-
-        {/* Optional Project Links */}
-        <div className="flex flex-col gap-2">
-          <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-            Project Links <span className="text-xs font-normal text-gray-500">(optional)</span>
-          </span>
-
-          {links.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-1">
-              {links.map((item, idx) => (
-                <div
-                  key={`${item.url}-${idx}`}
-                  className="flex items-center gap-2 text-xs font-mono px-3 py-1.5 rounded-md bg-accent/10 border border-accent/25 text-accent dark:text-accent-light"
-                >
-                  <span className="font-semibold">{item.name}:</span>
-                  <span className="truncate max-w-[160px]">{item.url.replace(/^https?:\/\//, '')}</span>
+            {formData.projectimgUrl ? (
+              <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-white/[0.12] aspect-[16/9] bg-slate-100 dark:bg-[#0b0d14]">
+                <img
+                  src={formData.projectimgUrl}
+                  alt="Project cover preview"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute top-3 right-3 flex gap-2">
                   <button
                     type="button"
-                    aria-label={`Remove ${item.name} link`}
-                    onClick={() => handleRemoveLink(idx)}
-                    className="text-gray-500 hover:text-red-500 font-bold ml-1 cursor-pointer"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploadingImage}
+                    className="bg-black/75 hover:bg-black text-white text-xs font-mono font-semibold px-3 py-1.5 rounded-full border border-white/15 backdrop-blur-md cursor-pointer"
                   >
-                    ×
+                    Change
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData((prev) => ({ ...prev, projectimgUrl: '' }))}
+                    className="bg-rose-600/90 hover:bg-rose-600 text-white text-xs font-mono font-semibold px-3 py-1.5 rounded-full cursor-pointer"
+                  >
+                    Remove
                   </button>
                 </div>
-              ))}
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingImage}
+                className="flex flex-col items-center justify-center gap-2.5 py-9 px-4 border border-dashed border-slate-300 dark:border-white/[0.16] hover:border-accent dark:hover:border-accent-light rounded-2xl bg-slate-50/70 dark:bg-white/[0.02] transition-colors cursor-pointer disabled:opacity-50"
+              >
+                <GlassIconTile size="md" accent={true}>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                  </svg>
+                </GlassIconTile>
+                <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                  {isUploadingImage ? 'Uploading cover photo...' : 'Click to upload a 16:9 cover photo'}
+                </span>
+                <span className="text-xs font-mono text-slate-500">
+                  JPEG, PNG, WebP or GIF · Max 5 MB
+                </span>
+              </button>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="hidden"
+              onChange={handleImageUpload}
+            />
+            {uploadError && <p role="alert" className="text-xs font-mono text-rose-500">{uploadError}</p>}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label htmlFor="edit-title" className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+              Project Title
+            </label>
+            <input
+              id="edit-title"
+              type="text"
+              required
+              maxLength={120}
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              className="px-3.5 py-2.5 glass-input rounded-xl text-sm"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label htmlFor="edit-description" className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+              Short Description
+            </label>
+            <textarea
+              id="edit-description"
+              required
+              rows="2"
+              maxLength={500}
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="px-3.5 py-2.5 glass-input rounded-xl text-sm resize-none"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label htmlFor="edit-languages" className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+              Languages / Stack <span className="font-normal text-slate-400">(comma separated)</span>
+            </label>
+            <input
+              id="edit-languages"
+              type="text"
+              placeholder="Rust, Go, TypeScript"
+              value={formData.languages}
+              onChange={(e) => setFormData({ ...formData, languages: e.target.value })}
+              className="px-3.5 py-2.5 glass-input rounded-xl text-sm"
+            />
+          </div>
+
+          {/* Optional Project Links */}
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+              Project Links <span className="font-normal text-slate-400">(optional)</span>
+            </span>
+
+            {links.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-1">
+                {links.map((item, idx) => (
+                  <div
+                    key={`${item.url}-${idx}`}
+                    className="flex items-center gap-2 text-xs font-mono px-3 py-1.5 rounded-full bg-accent/10 border border-accent/25 text-accent dark:text-accent-light"
+                  >
+                    <span className="font-semibold">{item.name}:</span>
+                    <span className="truncate max-w-[160px]">{item.url.replace(/^https?:\/\//, '')}</span>
+                    <button
+                      type="button"
+                      aria-label={`Remove ${item.name} link`}
+                      onClick={() => handleRemoveLink(idx)}
+                      className="text-slate-400 hover:text-rose-500 font-bold ml-1 cursor-pointer"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
+              <input
+                type="text"
+                placeholder="Label (e.g. Live Demo)"
+                value={linkName}
+                onChange={(e) => setLinkName(e.target.value)}
+                className="sm:col-span-4 px-3.5 py-2 glass-input rounded-xl text-sm"
+              />
+              <input
+                type="url"
+                placeholder="https://my-project.com"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    handleAddLink()
+                  }
+                }}
+                className="sm:col-span-6 px-3.5 py-2 glass-input rounded-xl text-sm"
+              />
+              <button
+                type="button"
+                onClick={handleAddLink}
+                className="sm:col-span-2 btn-glass-pill px-3 py-2 rounded-xl text-xs font-mono font-semibold cursor-pointer"
+              >
+                Add
+              </button>
+            </div>
+            {linkError && <p className="text-xs font-mono text-rose-500">{linkError}</p>}
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label htmlFor="edit-readme" className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+              Project Readme (Markdown supported)
+            </label>
+            <textarea
+              id="edit-readme"
+              rows="6"
+              value={formData.readme}
+              onChange={(e) => setFormData({ ...formData, readme: e.target.value })}
+              className="px-3.5 py-2.5 glass-input rounded-xl font-mono text-sm"
+            />
+          </div>
+
+          <div className="flex items-center gap-3 pt-1">
+            <input
+              id="edit-public"
+              type="checkbox"
+              checked={formData.isPublic}
+              onChange={(e) => setFormData({ ...formData, isPublic: e.target.checked })}
+              className="w-4 h-4 accent-accent rounded cursor-pointer"
+            />
+            <label htmlFor="edit-public" className="text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+              Make this project public
+            </label>
+          </div>
+
+          {error && (
+            <div role="alert" className="text-sm font-mono text-rose-500">
+              {error}
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
-            <input
-              type="text"
-              placeholder="Label (e.g. Live Demo)"
-              value={linkName}
-              onChange={(e) => setLinkName(e.target.value)}
-              className="sm:col-span-4 px-3 py-2 bg-gray-50 dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 rounded-md focus:outline-none focus:ring-2 focus:ring-accent text-gray-900 dark:text-gray-100 text-sm"
-            />
-            <input
-              type="url"
-              placeholder="https://my-project.com"
-              value={linkUrl}
-              onChange={(e) => setLinkUrl(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault()
-                  handleAddLink()
-                }
-              }}
-              className="sm:col-span-6 px-3 py-2 bg-gray-50 dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 rounded-md focus:outline-none focus:ring-2 focus:ring-accent text-gray-900 dark:text-gray-100 text-sm"
-            />
-            <button
-              type="button"
-              onClick={handleAddLink}
-              className="sm:col-span-2 bg-gray-200 dark:bg-neutral-800 hover:bg-gray-300 dark:hover:bg-neutral-700 text-gray-800 dark:text-white px-3 py-2 rounded-md text-sm font-semibold transition-colors border border-gray-300 dark:border-neutral-700 cursor-pointer"
-            >
-              Add
-            </button>
-          </div>
-          {linkError && <p className="text-xs font-mono text-red-500">{linkError}</p>}
+          <button
+            type="submit"
+            disabled={isSaving || isDeleting || isUploadingImage}
+            className="btn-3d-pill font-bold px-6 py-3 rounded-full text-sm disabled:opacity-50 cursor-pointer"
+          >
+            {isSaving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </form>
+
+        {/* Danger Zone */}
+        <div className="glass-panel border-rose-500/30 dark:border-rose-500/30 p-6 md:p-8 rounded-3xl">
+          <h2 className="text-base font-bold text-rose-600 dark:text-rose-400 mb-1.5">Danger Zone</h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-4">
+            Deleting this project permanently removes its readme, stars, and comments.
+          </p>
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={isSaving || isDeleting}
+            className="bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs sm:text-sm px-6 py-2.5 rounded-full transition-colors disabled:opacity-50 cursor-pointer shadow-lg shadow-rose-600/25"
+          >
+            {isDeleting ? 'Deleting...' : 'Delete Project'}
+          </button>
         </div>
-
-        <div className="flex flex-col gap-2">
-          <label htmlFor="edit-readme" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-            Project Readme (Markdown supported)
-          </label>
-          <textarea
-            id="edit-readme"
-            rows="6"
-            value={formData.readme}
-            onChange={(e) => setFormData({ ...formData, readme: e.target.value })}
-            className="px-3 py-2 bg-gray-50 dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 rounded-md focus:outline-none focus:ring-2 focus:ring-accent text-gray-900 dark:text-gray-100 font-mono text-sm"
-          />
-        </div>
-
-        <div className="flex items-center gap-3 pt-2">
-          <input
-            id="edit-public"
-            type="checkbox"
-            checked={formData.isPublic}
-            onChange={(e) => setFormData({ ...formData, isPublic: e.target.checked })}
-            className="w-4 h-4 accent-accent rounded cursor-pointer"
-          />
-          <label htmlFor="edit-public" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
-            Make this project public
-          </label>
-        </div>
-
-        {error && (
-          <div role="alert" className="text-sm font-mono text-red-600 dark:text-red-400">
-            {error}
-          </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={isSaving || isDeleting || isUploadingImage}
-          className="bg-accent hover:bg-accent-light text-white font-semibold px-6 py-2.5 rounded-md transition-colors disabled:opacity-50 cursor-pointer"
-        >
-          {isSaving ? 'Saving...' : 'Save Changes'}
-        </button>
-      </form>
-
-      {/* Danger Zone */}
-      <div className="border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/10 p-6 md:p-8 rounded-xl shadow-sm">
-        <h2 className="text-lg font-semibold text-red-700 dark:text-red-400 mb-2">Danger Zone</h2>
-        <p className="text-sm text-red-600/80 dark:text-red-300/80 mb-4">
-          Deleting this project permanently removes its readme, stars, and comments.
-        </p>
-        <button
-          type="button"
-          onClick={handleDelete}
-          disabled={isSaving || isDeleting}
-          className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2.5 rounded-md transition-colors disabled:opacity-50 cursor-pointer"
-        >
-          {isDeleting ? 'Deleting...' : 'Delete Project'}
-        </button>
       </div>
     </div>
   )

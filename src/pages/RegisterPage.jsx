@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout'
+import GlassIconTile from '../components/GlassIconTile'
 import { useAuth } from '../context/AuthContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { apiFetch, parseApiError } from '../lib/api'
@@ -50,16 +51,29 @@ export default function RegisterPage() {
 
   return (
     <AuthLayout>
-      <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-neutral-800 rounded-xl p-8 shadow-sm">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            Create your account
+      <div className="glass-panel rounded-3xl p-8 relative overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-accent-light/65 to-transparent"
+        />
+
+        <div className="flex flex-col items-center text-center mb-8">
+          <GlassIconTile size="lg" accent={true} className="mb-4">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.9" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+          </GlassIconTile>
+          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Claim your DevNest profile
           </h1>
+          <p className="text-xs font-mono text-slate-500 dark:text-slate-400 mt-1">
+            Showcase projects, live links, and your core stack
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
           <div className="flex flex-col gap-2">
-            <label htmlFor="username" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <label htmlFor="username" className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">
               Username
             </label>
             <input
@@ -69,14 +83,14 @@ export default function RegisterPage() {
               autoComplete="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="px-3 py-2 bg-gray-50 dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent text-gray-900 dark:text-gray-100 transition-shadow"
+              className="px-3.5 py-2.5 glass-input rounded-xl text-sm"
               placeholder="e.g. omar-dev"
               required
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="email" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <label htmlFor="email" className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">
               Email address
             </label>
             <input
@@ -86,14 +100,14 @@ export default function RegisterPage() {
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="px-3 py-2 bg-gray-50 dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent text-gray-900 dark:text-gray-100 transition-shadow"
+              className="px-3.5 py-2.5 glass-input rounded-xl text-sm"
               placeholder="you@example.com"
               required
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="password" className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <label htmlFor="password" className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">
               Password
             </label>
             <input
@@ -103,14 +117,14 @@ export default function RegisterPage() {
               autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="px-3 py-2 bg-gray-50 dark:bg-neutral-900 border border-gray-300 dark:border-neutral-700 rounded-md focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent text-gray-900 dark:text-gray-100 transition-shadow"
+              className="px-3.5 py-2.5 glass-input rounded-xl text-sm"
               placeholder="6 to 20 characters"
               required
             />
           </div>
 
           {error && (
-            <div role="alert" className="text-red-600 dark:text-red-400 font-mono text-xs break-words">
+            <div role="alert" className="text-rose-500 font-mono text-xs break-words">
               {error}
             </div>
           )}
@@ -118,16 +132,16 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={isLoading || !username.trim() || !email.trim() || !password}
-            className="w-full bg-accent hover:bg-accent-light text-white font-semibold text-sm px-4 py-2.5 rounded-md transition-colors mt-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="btn-3d-pill w-full font-bold text-sm px-4 py-3 rounded-full mt-1 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
           >
             {isLoading ? 'Creating account...' : 'Create account'}
           </button>
         </form>
       </div>
 
-      <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400 border-t border-gray-200 dark:border-neutral-800 pt-6">
+      <div className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
         Already have an account?{' '}
-        <Link to="/login" className="text-accent dark:text-accent-light hover:underline font-medium">
+        <Link to="/login" className="text-accent dark:text-accent-light hover:underline font-semibold">
           Sign in
         </Link>
       </div>
