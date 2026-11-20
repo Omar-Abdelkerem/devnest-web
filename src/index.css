@@ -1,6 +1,5 @@
 /*
- * index.css — Global stylesheet for DevNest (Tailwind v4)
- * Fonts are loaded non-blocking via <link rel="preconnect"> in index.html.
+ * index.css — Global stylesheet & GPU-only motion system for DevNest (Tailwind v4)
  */
 @import "tailwindcss";
 
@@ -31,44 +30,93 @@ html {
   background-color: #161616;
 }
 
-/* Keyboard accessibility: clear focus ring across all interactive elements */
 :focus-visible {
   outline: 2px solid var(--color-accent-light);
   outline-offset: 2px;
 }
 
-/* GPU-accelerated entrance & micro-interaction animations */
+/* ── GPU-Composited Keyframes ─────────────────────────────────────── */
 @keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translate3d(0, 14px, 0);
+    transform: translate3d(0, 18px, 0) scale(0.985);
   }
   to {
     opacity: 1;
-    transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 
-@keyframes subtlePulseGlow {
+@keyframes ambientFloatA {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(42, 138, 126, 0.25);
+    transform: translate3d(0, 0, 0) scale(1);
   }
   50% {
-    box-shadow: 0 0 24px 2px rgba(52, 168, 153, 0.35);
+    transform: translate3d(28px, -18px, 0) scale(1.08);
+  }
+}
+
+@keyframes ambientFloatB {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-24px, 20px, 0) scale(1.06);
+  }
+}
+
+@keyframes avatarRingSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes subtleBob {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -5px, 0);
   }
 }
 
 .animate-fade-up {
-  animation: fadeUp 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: fadeUp 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.animate-glow-ring {
-  animation: subtlePulseGlow 4s ease-in-out infinite;
+.animate-ambient-a {
+  animation: ambientFloatA 12s ease-in-out infinite;
+  will-change: transform;
 }
 
-/* Interactive Project Card spotlight & lift (GPU-only transform + opacity) */
+.animate-ambient-b {
+  animation: ambientFloatB 15s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-ring-spin {
+  animation: avatarRingSpin 10s linear infinite;
+  will-change: transform;
+}
+
+.animate-subtle-bob {
+  animation: subtleBob 5s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* ── Subtle dot grid background for hero & profile headers ────────── */
+.bg-dot-grid {
+  background-image: radial-gradient(rgba(42, 138, 126, 0.16) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* ── Interactive 3D Tilt + Spotlight Project Card (GPU-only) ──────── */
 .project-card-interactive {
   position: relative;
+  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate3d(0, 0, 0) scale(1);
   transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
               border-color 0.25s ease,
               box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1);
@@ -84,20 +132,32 @@ html {
   opacity: 0;
   transition: opacity 0.25s ease;
   background: radial-gradient(
-    360px circle at var(--mx, 50%) var(--my, 50%),
-    rgba(52, 168, 153, 0.14),
-    transparent 65%
+    420px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(52, 168, 153, 0.18),
+    transparent 62%
   );
 }
 
 .project-card-interactive:hover {
-  transform: translate3d(0, -6px, 0) scale(1.022);
-  box-shadow: 0 18px 36px -14px rgba(42, 138, 126, 0.28),
-              0 6px 14px -6px rgba(0, 0, 0, 0.25);
+  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate3d(0, -8px, 0) scale(1.028);
+  box-shadow: 0 24px 44px -16px rgba(42, 138, 126, 0.32),
+              0 10px 20px -8px rgba(0, 0, 0, 0.3);
 }
 
 .project-card-interactive:hover::after {
   opacity: 1;
+}
+
+/* Interactive skill pill micro-lift */
+.skill-pill {
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.2s ease,
+              box-shadow 0.2s ease;
+}
+
+.skill-pill:hover {
+  transform: translate3d(0, -2px, 0) scale(1.04);
+  box-shadow: 0 6px 14px -6px rgba(42, 138, 126, 0.35);
 }
 
 /* Respect user OS motion preferences */
@@ -106,17 +166,20 @@ html {
     scroll-behavior: auto;
   }
   .animate-fade-up,
-  .animate-glow-ring {
+  .animate-ambient-a,
+  .animate-ambient-b,
+  .animate-ring-spin,
+  .animate-subtle-bob {
     animation: none;
   }
   .project-card-interactive,
-  .project-card-interactive:hover {
+  .project-card-interactive:hover,
+  .skill-pill:hover {
     transform: none;
     transition: border-color 0.15s ease;
   }
 }
 
-/* Hide scrollbars on horizontal pill strips */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }

@@ -130,12 +130,12 @@ export default function SettingsPage() {
 
       const payload = {
         username: formData.username.trim(),
-        bio: formData.bio.trim() || null,
-        about: about.trim() || null,
-        location: formData.location.trim() || null,
+        bio: formData.bio.trim(),
+        about: about.trim(),
+        location: formData.location.trim(),
         age: parsedAge,
-        role: formData.role.trim() || null,
-        company: formData.company.trim() || null,
+        role: formData.role.trim(),
+        company: formData.company.trim(),
         availableForWork: formData.availableForWork,
         isPublic: formData.isPublic,
         links,

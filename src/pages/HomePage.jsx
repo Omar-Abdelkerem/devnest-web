@@ -59,7 +59,15 @@ export default function HomePage() {
   })
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-16 lg:py-24 flex flex-col items-center text-center">
+    <div className="relative w-full overflow-x-clip">
+      {/* Subtle GPU-animated ambient hero glow */}
+      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[420px] bg-dot-grid pointer-events-none overflow-hidden">
+        <div className="animate-ambient-a absolute -top-24 left-1/3 w-96 h-96 rounded-full bg-accent/15 dark:bg-accent/20 blur-3xl" />
+        <div className="animate-ambient-b absolute top-10 right-1/4 w-80 h-80 rounded-full bg-emerald-400/10 dark:bg-emerald-500/15 blur-3xl" />
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white dark:from-[#161616] to-transparent" />
+      </div>
+
+      <div className="relative max-w-6xl mx-auto px-6 py-16 lg:py-24 flex flex-col items-center text-center">
       {/* Hero Badge */}
       <div className="animate-fade-up inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-neutral-100 dark:bg-neutral-800/90 border border-neutral-200 dark:border-neutral-700 text-xs font-mono text-gray-700 dark:text-gray-300 mb-8">
         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -145,6 +153,7 @@ export default function HomePage() {
           </div>
         )}
       </div>
+    </div>
     </div>
   )
 }

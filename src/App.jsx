@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import ErrorBoundary from './components/ErrorBoundary'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
+import ScrollProgress from './components/ScrollProgress'
 
 // Code-split every route page so the initial bundle stays tiny and fast
 const HomePage = lazy(() => import('./pages/HomePage'))
@@ -66,6 +67,7 @@ function AppRoutes({ theme, toggleTheme }) {
 
   return (
     <div className="font-sans antialiased min-h-screen w-full overflow-x-hidden flex flex-col bg-white dark:bg-[#161616]">
+      <ScrollProgress />
       <Navbar theme={theme} onToggle={toggleTheme} />
 
       <main className="flex-1 flex flex-col w-full">

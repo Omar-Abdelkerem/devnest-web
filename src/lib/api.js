@@ -132,15 +132,38 @@ function safeExternalUrl(raw) {
   }
 }
 
+/** Turn raw Zod JSON strings or array errors into clean, human-readable text */
+function humanizeErrorMessage(raw, fallback) {
+  if (!raw || typeof raw !== 'string') return fallback
+  const trimmed = raw.trim()
+  if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+    try {
+      const parsed = JSON.parse(trimmed)
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const first = parsed[0]
+        const field = Array.isArray(first?.path) && first.path.length > 0 ? first.path.join('.') : null
+        if (first?.code === 'invalid_type' && field) {
+          return `Please check the "${field}" field and enter a valid value.`
+        }
+        return first?.message || fallback
+      }
+    } catch {
+      // fall through
+    }
+  }
+  return trimmed
+}
+
 /** Extract clean, user-friendly message & optional field errors from an API response */
 async function parseApiError(response, fallback = 'Something went wrong. Please try again.') {
   try {
     const data = await response.json()
-    const message =
+    const rawMessage =
       data?.error?.message ||
       data?.message ||
       (Array.isArray(data) && data[0]?.message) ||
       fallback
+    const message = humanizeErrorMessage(rawMessage, fallback)
     const fields = Array.isArray(data?.error?.fields) ? data.error.fields : []
     return { message, fields }
   } catch {

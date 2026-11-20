@@ -250,12 +250,29 @@ export default function PublicProfilePage() {
 
   const isOwnProfile =
     currentUser && (currentUser.id === profileUser.id || currentUser.username === profileUser.username)
+  const totalStars = mappedProjects.reduce((sum, p) => sum + (Number(p.stars) || 0), 0)
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12 flex flex-col lg:flex-row gap-12 bg-white dark:bg-[#161616] w-full">
-      <ProfileSidebar user={profileData} isEmpty={false} isPublicView={true} />
+    <div className="relative w-full min-h-screen bg-white dark:bg-[#161616] overflow-x-clip">
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 h-72 bg-dot-grid pointer-events-none overflow-hidden"
+      >
+        <div className="animate-ambient-a absolute -top-24 left-1/4 w-80 h-80 rounded-full bg-accent/15 dark:bg-accent/20 blur-3xl" />
+        <div className="animate-ambient-b absolute -top-16 right-1/4 w-72 h-72 rounded-full bg-emerald-400/10 dark:bg-emerald-500/15 blur-3xl" />
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white dark:from-[#161616] to-transparent" />
+      </div>
 
-      <div className="flex-1 min-w-0">
+      <div className="relative max-w-6xl mx-auto px-6 py-12 flex flex-col lg:flex-row gap-12 w-full">
+        <ProfileSidebar
+          user={profileData}
+          isEmpty={false}
+          isPublicView={true}
+          projectCount={mappedProjects.length}
+          totalStars={totalStars}
+        />
+
+        <div className="flex-1 min-w-0">
         <ProfileTabs projectCount={mappedProjects.length} activeTab={activeTab} onTabChange={setActiveTab} />
 
         {activeTab === 'projects' &&
@@ -370,6 +387,7 @@ export default function PublicProfilePage() {
             )}
           </div>
         )}
+        </div>
       </div>
     </div>
   )
