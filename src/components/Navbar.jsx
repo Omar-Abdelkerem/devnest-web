@@ -74,7 +74,7 @@ export default function Navbar({ theme, onToggle }) {
       <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
         {/* Split-Word Hover Animation: "Dev" glides up, "Nest" glides down */}
         <Link
-          to={user ? '/welcome' : '/'}
+          to="/"
           className="group flex items-center shrink-0 font-extrabold text-lg tracking-tight cursor-pointer py-1"
         >
           <span className="inline-block text-slate-900 dark:text-white transition-transform duration-200 ease-out group-hover:-translate-y-1">

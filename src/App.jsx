@@ -85,7 +85,7 @@ function AppRoutes({ theme, toggleTheme }) {
             >
               <Routes location={location}>
                 {/* Public pages render immediately without waiting for auth round-trip */}
-                <Route path="/" element={user ? <Navigate to={`/${user.username}`} replace /> : <HomePage />} />
+                <Route path="/" element={<HomePage />} />
                 <Route path="/welcome" element={<HomePage />} />
                 <Route path="/login" element={<GuestOnlyRoute><SignInPage /></GuestOnlyRoute>} />
                 <Route path="/register" element={<GuestOnlyRoute><RegisterPage /></GuestOnlyRoute>} />
