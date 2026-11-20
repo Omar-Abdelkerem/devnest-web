@@ -169,27 +169,16 @@ export default function ProfilePage() {
   const isEmpty = !user?.bio && projects.length === 0 && skills.length === 0
 
   return (
-    <div className="relative w-full min-h-screen bg-white dark:bg-[#161616] overflow-x-clip">
-      {/* Ambient GPU-Animated Hero Backdrop */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-x-0 top-0 h-72 bg-dot-grid pointer-events-none overflow-hidden"
-      >
-        <div className="animate-ambient-a absolute -top-24 left-1/4 w-80 h-80 rounded-full bg-accent/15 dark:bg-accent/20 blur-3xl" />
-        <div className="animate-ambient-b absolute -top-16 right-1/4 w-72 h-72 rounded-full bg-emerald-400/10 dark:bg-emerald-500/15 blur-3xl" />
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white dark:from-[#161616] to-transparent" />
-      </div>
+    <div className="max-w-6xl mx-auto px-6 py-12 flex flex-col lg:flex-row gap-8 lg:gap-12 bg-white dark:bg-[#161616] min-h-screen w-full">
+      <ProfileSidebar
+        user={profileData}
+        isEmpty={isEmpty}
+        isPublicView={false}
+        projectCount={mappedProjects.length}
+        totalStars={totalStars}
+      />
 
-      <div className="relative max-w-6xl mx-auto px-6 py-12 flex flex-col lg:flex-row gap-8 lg:gap-12 w-full">
-        <ProfileSidebar
-          user={profileData}
-          isEmpty={isEmpty}
-          isPublicView={false}
-          projectCount={mappedProjects.length}
-          totalStars={totalStars}
-        />
-
-        <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200 dark:border-white/10 pb-3 sm:pb-0 mb-6">
             <ProfileTabs projectCount={mappedProjects.length} activeTab={activeTab} onTabChange={setActiveTab} />
 
@@ -317,8 +306,7 @@ export default function ProfilePage() {
                 ))
               )}
             </div>
-          )}
-        </div>
+        )}
       </div>
     </div>
   )

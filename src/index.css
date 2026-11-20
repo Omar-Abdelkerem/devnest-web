@@ -1,5 +1,5 @@
 /*
- * index.css — Global stylesheet & GPU-only motion system for DevNest (Tailwind v4)
+ * index.css — Clean, refined global stylesheet for DevNest (Tailwind v4)
  */
 @import "tailwindcss";
 
@@ -35,141 +35,49 @@ html {
   outline-offset: 2px;
 }
 
-/* ── GPU-Composited Keyframes ─────────────────────────────────────── */
+/* Understated, crisp entrance animation */
 @keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translate3d(0, 18px, 0) scale(0.985);
+    transform: translate3d(0, 10px, 0);
   }
   to {
     opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-}
-
-@keyframes ambientFloatA {
-  0%, 100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(28px, -18px, 0) scale(1.08);
-  }
-}
-
-@keyframes ambientFloatB {
-  0%, 100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(-24px, 20px, 0) scale(1.06);
-  }
-}
-
-@keyframes avatarRingSpin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes subtleBob {
-  0%, 100% {
     transform: translate3d(0, 0, 0);
-  }
-  50% {
-    transform: translate3d(0, -5px, 0);
   }
 }
 
 .animate-fade-up {
-  animation: fadeUp 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: fadeUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.animate-ambient-a {
-  animation: ambientFloatA 12s ease-in-out infinite;
-  will-change: transform;
-}
-
-.animate-ambient-b {
-  animation: ambientFloatB 15s ease-in-out infinite;
-  will-change: transform;
-}
-
-.animate-ring-spin {
-  animation: avatarRingSpin 10s linear infinite;
-  will-change: transform;
-}
-
-.animate-subtle-bob {
-  animation: subtleBob 5s ease-in-out infinite;
-  will-change: transform;
-}
-
-/* ── Subtle dot grid background for hero & profile headers ────────── */
-.bg-dot-grid {
-  background-image: radial-gradient(rgba(42, 138, 126, 0.16) 1px, transparent 1px);
-  background-size: 22px 22px;
-}
-
-/* ── Interactive 3D Tilt + Spotlight Project Card (GPU-only) ──────── */
+/* Clean, refined card hover — subtle lift & crisp shadow, no gimmicks */
 .project-card-interactive {
   position: relative;
-  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate3d(0, 0, 0) scale(1);
-  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
-              border-color 0.25s ease,
-              box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 0.2s ease,
+              box-shadow 0.22s ease;
   will-change: transform;
-}
-
-.project-card-interactive::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-  background: radial-gradient(
-    420px circle at var(--mx, 50%) var(--my, 50%),
-    rgba(52, 168, 153, 0.18),
-    transparent 62%
-  );
 }
 
 .project-card-interactive:hover {
-  transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translate3d(0, -8px, 0) scale(1.028);
-  box-shadow: 0 24px 44px -16px rgba(42, 138, 126, 0.32),
-              0 10px 20px -8px rgba(0, 0, 0, 0.3);
+  transform: translate3d(0, -3px, 0);
+  box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.35);
 }
 
-.project-card-interactive:hover::after {
-  opacity: 1;
-}
-
-/* Interactive skill pill micro-lift */
 .skill-pill {
-  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1),
-              border-color 0.2s ease,
-              box-shadow 0.2s ease;
+  transition: transform 0.18s ease, border-color 0.18s ease;
 }
 
 .skill-pill:hover {
-  transform: translate3d(0, -2px, 0) scale(1.04);
-  box-shadow: 0 6px 14px -6px rgba(42, 138, 126, 0.35);
+  transform: translate3d(0, -1px, 0);
 }
 
-/* Respect user OS motion preferences */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
-  .animate-fade-up,
-  .animate-ambient-a,
-  .animate-ambient-b,
-  .animate-ring-spin,
-  .animate-subtle-bob {
+  .animate-fade-up {
     animation: none;
   }
   .project-card-interactive,
