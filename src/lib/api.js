@@ -4,12 +4,17 @@
  * and safe URL / error helpers.
  */
 const envUrl = import.meta.env.VITE_API_URL || ''
-const rawBase = String(envUrl).replace(/\/$/, '')
+const trimmedEnv = String(envUrl).trim().replace(/\/$/, '')
+const rawBase =
+  trimmedEnv && !/^https?:\/\//i.test(trimmedEnv)
+    ? `https://${trimmedEnv}`
+    : trimmedEnv
 
 const isLocalBackend =
   !rawBase ||
   rawBase === 'http://localhost:3000' ||
-  rawBase === 'http://127.0.0.1:3000'
+  rawBase === 'http://127.0.0.1:3000' ||
+  rawBase === 'https://localhost:3000'
 
 const API_BASE = isLocalBackend ? '' : rawBase
 
