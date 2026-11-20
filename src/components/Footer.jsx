@@ -9,11 +9,15 @@ const FOOTER_LINKS = [
 
 export default function Footer() {
   return (
-    <footer className="bg-white dark:bg-[#090a0f] border-t border-slate-200/80 dark:border-white/[0.07]">
+    <footer className="bg-white dark:bg-[#07070b] border-t border-slate-200/80 dark:border-white/[0.07]">
       <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center gap-6 md:gap-0">
-        <Link to="/" className="flex items-center font-bold text-base shrink-0">
-          <span className="text-slate-900 dark:text-white">Dev</span>
-          <span className="text-accent dark:text-accent-light ml-0.5">Nest</span>
+        <Link to="/" className="group flex items-center font-bold text-base shrink-0 py-1">
+          <span className="inline-block text-slate-900 dark:text-white transition-transform duration-200 ease-out group-hover:-translate-y-0.5">
+            Dev
+          </span>
+          <span className="inline-block text-accent dark:text-accent-light ml-0.5 transition-transform duration-200 ease-out group-hover:translate-y-0.5">
+            Nest
+          </span>
         </Link>
 
         <nav

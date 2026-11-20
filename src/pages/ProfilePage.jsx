@@ -3,9 +3,16 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { apiFetch, getStarCount } from '../lib/api'
+import {
+  savePinnedState,
+  saveProjectOrder,
+  sortProjectsWithOrder,
+} from '../lib/projectOrder'
 import ProfileSidebar from '../components/ProfileSidebar'
 import ProfileTabs from '../components/ProfileTabs'
 import ProjectCard from '../components/ProjectCard'
+import PortfolioHighlights from '../components/PortfolioHighlights'
+import ContactCTA from '../components/ContactCTA'
 import VolumetricBackground from '../components/VolumetricBackground'
 import GlassIconTile from '../components/GlassIconTile'
 
@@ -17,6 +24,8 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(() => Boolean(user))
   const [activeTab, setActiveTab] = useState('projects')
   const [copied, setCopied] = useState(false)
+  const [isReordering, setIsReordering] = useState(false)
+  const [orderVersion, setOrderVersion] = useState(0)
 
   const displayUsername = user?.username || (user?.email ? user.email.split('@')[0] : 'developer')
   useDocumentTitle(`@${displayUsername}`, user?.bio || `${displayUsername}'s developer portfolio on DevNest.`)
@@ -89,12 +98,20 @@ export default function ProfilePage() {
     () => ({
       name: user?.name || displayUsername,
       handle: displayUsername,
+      headline: user?.headline,
       bio: user?.bio,
       about: user?.about,
       location: user?.location,
       age: user?.age,
       role: user?.role,
       company: user?.company,
+      education: user?.education,
+      yearsOfExperience: user?.yearsOfExperience,
+      workPreferences: user?.workPreferences,
+      phone: user?.phone,
+      whatsapp: user?.whatsapp,
+      contactEmail: user?.contactEmail || user?.email,
+      resumeUrl: user?.resumeUrl,
       availableForWork: user?.availableForWork,
       avatarUrl: user?.avatarUrl,
       links: user?.links || [],
@@ -112,37 +129,40 @@ export default function ProfilePage() {
     [user, displayUsername, skills],
   )
 
-  const mappedProjects = useMemo(
-    () =>
-      projects
-        .filter(Boolean)
-        .map((p) => ({
-          id: p.id,
-          repo: p.title || p.name || 'Untitled Project',
-          description: p.description || '',
-          projectimgUrl: p.projectimgUrl || null,
-          links: p.links || [],
-          badges: p.isPublic === false ? ['PRIVATE'] : [],
-          languages: p.languages || (p.language ? [{ name: p.language }] : []),
-          language:
-            p.language ||
-            (p.languages?.length > 0
-              ? typeof p.languages[0] === 'string'
-                ? p.languages[0]
-                : p.languages[0].name
-              : null) ||
-            'Code',
-          languageColor: p.languageColor || '#38b2a3',
-          stars: getStarCount(p),
-          _count: p._count,
-          updatedAt: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'Recently',
-          author: displayUsername,
-          authorUsername: user?.username || user?.handle || displayUsername,
-          authorHandle: user?.username || user?.handle || displayUsername,
-          authorAvatar: user?.avatarUrl,
-        })),
-    [projects, displayUsername, user],
-  )
+  const mappedProjects = useMemo(() => {
+    const rawMapped = projects
+      .filter(Boolean)
+      .map((p) => ({
+        id: p.id,
+        repo: p.title || p.name || 'Untitled Project',
+        description: p.description || '',
+        projectimgUrl: p.projectimgUrl || null,
+        links: p.links || [],
+        isPinned: Boolean(p.isPinned),
+        sortOrder: typeof p.sortOrder === 'number' ? p.sortOrder : 0,
+        badges: p.isPublic === false ? ['PRIVATE'] : [],
+        languages: p.languages || (p.language ? [{ name: p.language }] : []),
+        language:
+          p.language ||
+          (p.languages?.length > 0
+            ? typeof p.languages[0] === 'string'
+              ? p.languages[0]
+              : p.languages[0].name
+            : null) ||
+          'Code',
+        languageColor: p.languageColor || '#38b2a3',
+        stars: getStarCount(p),
+        _count: p._count,
+        updatedAt: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'Recently',
+        author: displayUsername,
+        authorUsername: user?.username || user?.handle || displayUsername,
+        authorHandle: user?.username || user?.handle || displayUsername,
+        authorAvatar: user?.avatarUrl,
+      }))
+
+    return sortProjectsWithOrder(rawMapped, displayUsername)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projects, displayUsername, user, orderVersion])
 
   const totalStars = useMemo(
     () => mappedProjects.reduce((sum, p) => sum + (Number(p.stars) || 0), 0),
@@ -153,6 +173,60 @@ export default function ProfilePage() {
     setProjects((prev) =>
       prev.map((p) => (p.id === projectId ? { ...p, projectimgUrl: newUrl } : p)),
     )
+  }
+
+  const persistNewOrder = async (orderedIds) => {
+    saveProjectOrder(displayUsername, orderedIds)
+    setOrderVersion((v) => v + 1)
+    try {
+      await apiFetch('/api/v1/projects/reorder', {
+        method: 'PATCH',
+        body: JSON.stringify({ projectIds: orderedIds }),
+      })
+    } catch {
+      // Local order is already persisted
+    }
+  }
+
+  const handleMoveProject = (projectId, direction) => {
+    const currentIds = mappedProjects.map((p) => p.id)
+    const idx = currentIds.indexOf(projectId)
+    if (idx === -1) return
+
+    const targetIdx = direction === 'up' ? idx - 1 : idx + 1
+    if (targetIdx < 0 || targetIdx >= currentIds.length) return
+
+    const nextIds = [...currentIds]
+    const [moved] = nextIds.splice(idx, 1)
+    nextIds.splice(targetIdx, 0, moved)
+
+    setProjects((prev) => {
+      const orderMap = new Map(nextIds.map((id, i) => [id, i]))
+      return prev.map((p) => (orderMap.has(p.id) ? { ...p, sortOrder: orderMap.get(p.id) } : p))
+    })
+
+    persistNewOrder(nextIds)
+  }
+
+  const handleTogglePin = async (projectId) => {
+    const target = mappedProjects.find((p) => p.id === projectId)
+    if (!target) return
+    const nextPinned = !target.isPinned
+
+    savePinnedState(displayUsername, projectId, nextPinned)
+    setProjects((prev) =>
+      prev.map((p) => (p.id === projectId ? { ...p, isPinned: nextPinned } : p)),
+    )
+    setOrderVersion((v) => v + 1)
+
+    try {
+      await apiFetch(`/api/v1/projects/${projectId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ isPinned: nextPinned }),
+      })
+    } catch {
+      // Local pin state is already saved
+    }
   }
 
   if (isLoading) {
@@ -183,7 +257,10 @@ export default function ProfilePage() {
           totalStars={totalStars}
         />
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 flex flex-col">
+          {/* Portfolio Overview & Stack Highlights */}
+          <PortfolioHighlights user={profileData} projects={mappedProjects} />
+
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 mb-6 border-b border-slate-200/80 dark:border-white/[0.08]">
             <ProfileTabs
               projectCount={mappedProjects.length}
@@ -192,7 +269,21 @@ export default function ProfilePage() {
             />
 
             {/* Action bar */}
-            <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex flex-wrap items-center gap-2">
+              {mappedProjects.length > 1 && activeTab === 'projects' && (
+                <button
+                  type="button"
+                  onClick={() => setIsReordering((prev) => !prev)}
+                  className={`text-xs font-mono font-semibold px-3.5 py-2 rounded-full cursor-pointer transition-all ${
+                    isReordering
+                      ? 'btn-3d-pill'
+                      : 'btn-glass-pill'
+                  }`}
+                >
+                  <span>{isReordering ? '✓ Done' : '↕ Rearrange'}</span>
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={handleCopyProfileLink}
@@ -235,6 +326,21 @@ export default function ProfilePage() {
             </div>
           </div>
 
+          {isReordering && activeTab === 'projects' && (
+            <div className="mb-5 px-4 py-3 rounded-2xl glass-panel border-accent/40 flex items-center justify-between gap-3 text-xs font-mono text-slate-700 dark:text-slate-200">
+              <span>
+                Use <strong>Pin to top</strong> or <strong>↑ Up / ↓ Down</strong> on any card to customize the exact order visitors see on your portfolio.
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsReordering(false)}
+                className="text-accent dark:text-accent-light font-bold hover:underline shrink-0 cursor-pointer"
+              >
+                Done
+              </button>
+            </div>
+          )}
+
           {activeTab === 'projects' &&
             (mappedProjects.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -248,6 +354,12 @@ export default function ProfilePage() {
                       project={project}
                       isOwner={true}
                       onImageUpdated={handleProjectImageUpdated}
+                      isReordering={isReordering}
+                      canMoveUp={idx > 0}
+                      canMoveDown={idx < mappedProjects.length - 1}
+                      onMoveUp={(id) => handleMoveProject(id, 'up')}
+                      onMoveDown={(id) => handleMoveProject(id, 'down')}
+                      onTogglePin={handleTogglePin}
                     />
                   </div>
                 ))}
@@ -334,6 +446,15 @@ export default function ProfilePage() {
               )}
             </div>
           )}
+
+          {/* Direct Reach Out / Hiring CTA Banner on Profile Page */}
+          <div className="mt-10 pt-4">
+            <ContactCTA
+              developer={profileData}
+              isOwner={true}
+              variant="profile"
+            />
+          </div>
         </div>
       </div>
     </div>

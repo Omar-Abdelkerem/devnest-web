@@ -4,6 +4,17 @@ import { safeExternalUrl } from '../lib/api'
 import AnimatedCounter from './AnimatedCounter'
 import GlassIconTile from './GlassIconTile'
 
+function buildWhatsAppUrl(rawWhatsapp, handle = 'developer') {
+  if (!rawWhatsapp || typeof rawWhatsapp !== 'string') return null
+  const trimmed = rawWhatsapp.trim()
+  if (!trimmed) return null
+  if (/^https?:\/\//i.test(trimmed)) return safeExternalUrl(trimmed)
+  const digits = trimmed.replace(/[^\d]/g, '')
+  if (digits.length < 7) return null
+  const text = encodeURIComponent(`Hi @${handle}, I saw your developer portfolio on DevNest and wanted to connect!`)
+  return `https://wa.me/${digits}?text=${text}`
+}
+
 export default function ProfileSidebar({
   user,
   isEmpty,
@@ -16,9 +27,15 @@ export default function ProfileSidebar({
   const { scrollY } = useScroll()
   const avatarScale = useTransform(scrollY, [0, 360], [1, prefersReduced ? 1 : 0.94])
 
+  const whatsappUrl = buildWhatsAppUrl(user?.whatsapp || user?.phone, user?.handle)
+  const resumeUrl = safeExternalUrl(user?.resumeUrl || '')
+
   const hasMeta =
     user?.role ||
     user?.company ||
+    user?.yearsOfExperience !== null && user?.yearsOfExperience !== undefined ||
+    user?.education ||
+    user?.workPreferences ||
     user?.location ||
     user?.age ||
     user?.joinedYear
@@ -81,7 +98,7 @@ export default function ProfileSidebar({
           </div>
         </motion.div>
 
-        {/* Name & Handle */}
+        {/* Name, Handle & Headline */}
         <div className="text-center lg:text-left">
           <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
             {user?.name}
@@ -89,6 +106,11 @@ export default function ProfileSidebar({
           <p className="text-sm font-mono text-accent dark:text-accent-light">
             @{user?.handle}
           </p>
+          {user?.headline && (
+            <p className="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 mt-1.5">
+              {user.headline}
+            </p>
+          )}
         </div>
 
         {/* Frosted Stats Bento Grid (Projects & Total Stars with AnimatedCounter) */}
@@ -123,16 +145,47 @@ export default function ProfileSidebar({
           </p>
         )}
 
-        {!isPublicView && (
-          <Link
-            to="/settings"
-            className="btn-glass-pill w-full text-center py-2.5 px-4 rounded-xl text-xs font-mono font-semibold"
-          >
-            <span>Edit Profile</span>
-          </Link>
-        )}
+        {/* Quick Sidebar Action / Contact Buttons */}
+        <div className="flex flex-col gap-2">
+          {whatsappUrl && (
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-mono font-bold text-white bg-gradient-to-b from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 border border-emerald-400/40 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.35),0_6px_16px_-4px_rgba(16,185,129,0.4)] transition-all"
+            >
+              <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zM12 2C6.486 2 2 6.486 2 12c0 1.766.462 3.494 1.335 5.012L2 22l5.132-1.347A9.946 9.946 0 0012 22c5.514 0 10-4.486 10-10S17.514 2 12 2z" />
+              </svg>
+              <span>Message on WhatsApp</span>
+            </a>
+          )}
 
-        {/* Developer Metadata */}
+          {resumeUrl && (
+            <a
+              href={resumeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-glass-pill w-full text-center py-2.5 px-4 rounded-xl text-xs font-mono font-semibold"
+            >
+              <svg className="w-3.5 h-3.5 text-accent dark:text-accent-light" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span>View Resume / CV ↗</span>
+            </a>
+          )}
+
+          {!isPublicView && (
+            <Link
+              to="/settings"
+              className="btn-glass-pill w-full text-center py-2.5 px-4 rounded-xl text-xs font-mono font-semibold"
+            >
+              <span>Edit Profile &amp; Contact CTA</span>
+            </Link>
+          )}
+        </div>
+
+        {/* Rich Developer Metadata */}
         {hasMeta && (
           <ul className="flex flex-col gap-2.5 pt-4 border-t border-slate-200/80 dark:border-white/[0.07] text-sm text-slate-700 dark:text-slate-300">
             {(user?.role || user?.company) && (
@@ -145,6 +198,34 @@ export default function ProfileSidebar({
                   {user.role && user.company ? ' @ ' : ''}
                   {user.company && <strong className="font-semibold text-slate-900 dark:text-white">{user.company}</strong>}
                 </span>
+              </li>
+            )}
+            {user?.yearsOfExperience !== null && user?.yearsOfExperience !== undefined && user?.yearsOfExperience !== '' && (
+              <li className="flex items-center gap-2.5">
+                <svg className="w-4 h-4 text-accent dark:text-accent-light shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <span>
+                  <strong className="font-semibold text-slate-900 dark:text-white">{user.yearsOfExperience}+</strong>{' '}
+                  {Number(user.yearsOfExperience) === 1 ? 'year' : 'years'} of experience
+                </span>
+              </li>
+            )}
+            {user?.education && (
+              <li className="flex items-center gap-2.5">
+                <svg className="w-4 h-4 text-accent dark:text-accent-light shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                </svg>
+                <span className="truncate" title={user.education}>{user.education}</span>
+              </li>
+            )}
+            {user?.workPreferences && (
+              <li className="flex items-center gap-2.5">
+                <svg className="w-4 h-4 text-accent dark:text-accent-light shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9" />
+                </svg>
+                <span className="truncate" title={user.workPreferences}>{user.workPreferences}</span>
               </li>
             )}
             {user?.location && (
@@ -183,7 +264,7 @@ export default function ProfileSidebar({
             About
           </h2>
           {user?.about ? (
-            <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-sans break-words">
+            <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-sans whitespace-pre-line break-words">
               {user.about}
             </p>
           ) : (

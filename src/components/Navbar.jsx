@@ -67,17 +67,22 @@ export default function Navbar({ theme, onToggle }) {
       transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
       className={`sticky top-0 z-50 w-full transition-colors duration-200 ${
         isScrolled
-          ? 'bg-white/90 dark:bg-[#090a0f]/88 backdrop-blur-md border-b border-slate-200/80 dark:border-white/[0.08]'
-          : 'bg-white/80 dark:bg-[#090a0f]/75 backdrop-blur-sm border-b border-slate-200/60 dark:border-white/[0.05]'
+          ? 'bg-white/90 dark:bg-[#07070b]/88 backdrop-blur-md border-b border-slate-200/80 dark:border-white/[0.08]'
+          : 'bg-white/80 dark:bg-[#07070b]/75 backdrop-blur-sm border-b border-slate-200/60 dark:border-white/[0.05]'
       }`}
     >
       <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+        {/* Split-Word Hover Animation: "Dev" glides up, "Nest" glides down */}
         <Link
           to={user ? '/welcome' : '/'}
-          className="flex items-center shrink-0 font-bold text-lg tracking-tight cursor-pointer"
+          className="group flex items-center shrink-0 font-extrabold text-lg tracking-tight cursor-pointer py-1"
         >
-          <span className="text-slate-900 dark:text-white">Dev</span>
-          <span className="text-accent dark:text-accent-light ml-0.5">Nest</span>
+          <span className="inline-block text-slate-900 dark:text-white transition-transform duration-200 ease-out group-hover:-translate-y-1">
+            Dev
+          </span>
+          <span className="inline-block text-accent dark:text-accent-light ml-0.5 transition-transform duration-200 ease-out group-hover:translate-y-1">
+            Nest
+          </span>
         </Link>
 
         {/* Desktop Menu */}

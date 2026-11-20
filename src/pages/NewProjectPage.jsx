@@ -1,10 +1,13 @@
 import { useState, useRef } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { apiFetch, parseApiError, safeExternalUrl } from '../lib/api'
+import { savePinnedState } from '../lib/projectOrder'
 
 export default function NewProjectPage() {
   useDocumentTitle('Create New Project')
+  const { user } = useAuth()
   const navigate = useNavigate()
   const fileInputRef = useRef(null)
 
@@ -18,6 +21,7 @@ export default function NewProjectPage() {
   const [linkUrl, setLinkUrl] = useState('')
   const [linkError, setLinkError] = useState('')
   const [isPublic, setIsPublic] = useState(true)
+  const [isPinned, setIsPinned] = useState(false)
 
   const [isUploadingImage, setIsUploadingImage] = useState(false)
   const [uploadError, setUploadError] = useState('')
@@ -102,6 +106,7 @@ export default function NewProjectPage() {
         languages: languagesArray,
         links,
         isPublic,
+        isPinned,
         ...(projectimgUrl ? { projectimgUrl } : {}),
       }
 
@@ -112,6 +117,9 @@ export default function NewProjectPage() {
 
       if (response.ok) {
         const created = await response.json()
+        if (created?.id && isPinned) {
+          savePinnedState(user?.username, created.id, true)
+        }
         navigate(created?.id ? `/project/${created.id}` : '/profile', { replace: true })
       } else {
         const { message } = await parseApiError(response, 'Failed to create project.')
@@ -321,16 +329,27 @@ export default function NewProjectPage() {
           />
         </div>
 
-        <div className="flex items-center gap-3 pt-1">
-          <input
-            type="checkbox"
-            id="isPublic"
-            checked={isPublic}
-            onChange={(e) => setIsPublic(e.target.checked)}
-            className="w-4 h-4 accent-accent rounded cursor-pointer"
-          />
-          <label htmlFor="isPublic" className="text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+        <div className="flex flex-wrap items-center gap-6 pt-1">
+          <label htmlFor="isPublic" className="flex items-center gap-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+            <input
+              type="checkbox"
+              id="isPublic"
+              checked={isPublic}
+              onChange={(e) => setIsPublic(e.target.checked)}
+              className="w-4 h-4 accent-accent rounded cursor-pointer"
+            />
             Make this project public
+          </label>
+
+          <label htmlFor="isPinned" className="flex items-center gap-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+            <input
+              type="checkbox"
+              id="isPinned"
+              checked={isPinned}
+              onChange={(e) => setIsPinned(e.target.checked)}
+              className="w-4 h-4 accent-accent rounded cursor-pointer"
+            />
+            Pin to top of my portfolio
           </label>
         </div>
 

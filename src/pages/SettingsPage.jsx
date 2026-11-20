@@ -12,11 +12,22 @@ export default function SettingsPage() {
 
   const [formData, setFormData] = useState(() => ({
     username: user?.username || '',
+    headline: user?.headline || '',
     bio: user?.bio || '',
     location: user?.location || '',
     age: user?.age ? String(user.age) : '',
     role: user?.role || '',
     company: user?.company || '',
+    education: user?.education || '',
+    yearsOfExperience:
+      user?.yearsOfExperience !== null && user?.yearsOfExperience !== undefined
+        ? String(user.yearsOfExperience)
+        : '',
+    workPreferences: user?.workPreferences || '',
+    phone: user?.phone || '',
+    whatsapp: user?.whatsapp || '',
+    contactEmail: user?.contactEmail || '',
+    resumeUrl: user?.resumeUrl || '',
     availableForWork: Boolean(user?.availableForWork),
     isPublic: user?.isPublic !== undefined ? Boolean(user.isPublic) : true,
   }))
@@ -128,14 +139,43 @@ export default function SettingsPage() {
         return
       }
 
+      const parsedYoe = formData.yearsOfExperience.trim()
+        ? parseInt(formData.yearsOfExperience, 10)
+        : null
+      if (
+        formData.yearsOfExperience.trim() &&
+        (!Number.isInteger(parsedYoe) || parsedYoe < 0 || parsedYoe > 60)
+      ) {
+        setProfileError('Years of experience must be a whole number between 0 and 60.')
+        setIsProfileLoading(false)
+        return
+      }
+
+      const normalizedResume = formData.resumeUrl.trim()
+        ? safeExternalUrl(formData.resumeUrl.trim())
+        : ''
+      if (formData.resumeUrl.trim() && !normalizedResume) {
+        setProfileError('Resume URL must be a valid http:// or https:// link.')
+        setIsProfileLoading(false)
+        return
+      }
+
       const payload = {
         username: formData.username.trim(),
+        headline: formData.headline.trim(),
         bio: formData.bio.trim(),
         about: about.trim(),
         location: formData.location.trim(),
         age: parsedAge,
         role: formData.role.trim(),
         company: formData.company.trim(),
+        education: formData.education.trim(),
+        yearsOfExperience: parsedYoe,
+        workPreferences: formData.workPreferences.trim(),
+        phone: formData.phone.trim(),
+        whatsapp: formData.whatsapp.trim(),
+        contactEmail: formData.contactEmail.trim(),
+        resumeUrl: normalizedResume,
         availableForWork: formData.availableForWork,
         isPublic: formData.isPublic,
         links,
@@ -232,7 +272,7 @@ export default function SettingsPage() {
           ← Back to profile
         </Link>
         <h1 className="text-3xl font-bold text-slate-900 dark:text-white mt-4 tracking-tight">
-          Profile Settings
+          Profile &amp; Portfolio Settings
         </h1>
       </div>
 
@@ -277,7 +317,7 @@ export default function SettingsPage() {
           className="flex flex-col gap-6 glass-panel p-6 md:p-8 rounded-xl"
         >
           <h2 className="text-base font-bold text-slate-900 dark:text-white border-b border-slate-200/70 dark:border-white/[0.08] pb-3">
-            Sidebar &amp; Basic Info
+            Identity &amp; Professional Details
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -290,6 +330,109 @@ export default function SettingsPage() {
                 type="text"
                 name="username"
                 value={formData.username}
+                onChange={handleChange}
+                className="px-3.5 py-2 glass-input rounded-lg text-sm"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="settings-headline" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Headline / Specialty <span className="text-xs font-normal text-slate-500">(optional)</span>
+              </label>
+              <input
+                id="settings-headline"
+                type="text"
+                name="headline"
+                maxLength={120}
+                placeholder="e.g. Backend & Distributed Systems Engineer"
+                value={formData.headline}
+                onChange={handleChange}
+                className="px-3.5 py-2 glass-input rounded-lg text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="settings-role" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Current Role / Title <span className="text-xs font-normal text-slate-500">(optional)</span>
+              </label>
+              <input
+                id="settings-role"
+                type="text"
+                name="role"
+                maxLength={80}
+                placeholder="e.g. Full-Stack Engineer"
+                value={formData.role}
+                onChange={handleChange}
+                className="px-3.5 py-2 glass-input rounded-lg text-sm"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="settings-company" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Company / Organization <span className="text-xs font-normal text-slate-500">(optional)</span>
+              </label>
+              <input
+                id="settings-company"
+                type="text"
+                name="company"
+                maxLength={80}
+                placeholder="e.g. DevNest Labs"
+                value={formData.company}
+                onChange={handleChange}
+                className="px-3.5 py-2 glass-input rounded-lg text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="settings-yoe" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Years of Experience <span className="text-xs font-normal text-slate-500">(optional)</span>
+              </label>
+              <input
+                id="settings-yoe"
+                type="number"
+                name="yearsOfExperience"
+                min={0}
+                max={60}
+                placeholder="e.g. 3"
+                value={formData.yearsOfExperience}
+                onChange={handleChange}
+                className="px-3.5 py-2 glass-input rounded-lg text-sm"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="settings-education" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Education / Degree <span className="text-xs font-normal text-slate-500">(optional)</span>
+              </label>
+              <input
+                id="settings-education"
+                type="text"
+                name="education"
+                maxLength={120}
+                placeholder="e.g. B.Sc. Computer Science — Cairo University"
+                value={formData.education}
+                onChange={handleChange}
+                className="px-3.5 py-2 glass-input rounded-lg text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="settings-location" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Location <span className="text-xs font-normal text-slate-500">(optional)</span>
+              </label>
+              <input
+                id="settings-location"
+                type="text"
+                name="location"
+                maxLength={100}
+                placeholder="e.g. Cairo, Egypt"
+                value={formData.location}
                 onChange={handleChange}
                 className="px-3.5 py-2 glass-input rounded-lg text-sm"
               />
@@ -311,56 +454,22 @@ export default function SettingsPage() {
                 className="px-3.5 py-2 glass-input rounded-lg text-sm"
               />
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
-              <label htmlFor="settings-location" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                Location <span className="text-xs font-normal text-slate-500">(optional)</span>
+              <label htmlFor="settings-workPreferences" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Work Preference <span className="text-xs font-normal text-slate-500">(optional)</span>
               </label>
               <input
-                id="settings-location"
+                id="settings-workPreferences"
                 type="text"
-                name="location"
-                maxLength={100}
-                placeholder="e.g. Cairo, Egypt"
-                value={formData.location}
+                name="workPreferences"
+                maxLength={120}
+                placeholder="Remote · Full-time · Contract"
+                value={formData.workPreferences}
                 onChange={handleChange}
                 className="px-3.5 py-2 glass-input rounded-lg text-sm"
               />
             </div>
-
-            <div className="flex flex-col gap-2">
-              <label htmlFor="settings-role" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                Role / Title <span className="text-xs font-normal text-slate-500">(optional)</span>
-              </label>
-              <input
-                id="settings-role"
-                type="text"
-                name="role"
-                maxLength={80}
-                placeholder="e.g. Full-Stack Engineer"
-                value={formData.role}
-                onChange={handleChange}
-                className="px-3.5 py-2 glass-input rounded-lg text-sm"
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label htmlFor="settings-company" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-              Company / University <span className="text-xs font-normal text-slate-500">(optional)</span>
-            </label>
-            <input
-              id="settings-company"
-              type="text"
-              name="company"
-              maxLength={80}
-              placeholder="e.g. DevNest Labs"
-              value={formData.company}
-              onChange={handleChange}
-              className="px-3.5 py-2 glass-input rounded-lg text-sm"
-            />
           </div>
 
           <div className="flex flex-wrap gap-6 pt-1">
@@ -387,7 +496,86 @@ export default function SettingsPage() {
             </label>
           </div>
 
-          <div className="flex flex-col gap-2">
+          {/* DIRECT CONTACT & HIRING CTA SECTION */}
+          <div className="pt-4 border-t border-slate-200/70 dark:border-white/[0.08] flex flex-col gap-4">
+            <div>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                Direct Contact &amp; Hiring CTA
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Displayed on your profile and project pages so recruiters, clients, and collaborators can reach you in one click.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-2">
+                <label htmlFor="settings-whatsapp" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  WhatsApp Number or Link <span className="text-xs font-normal text-slate-500">(optional)</span>
+                </label>
+                <input
+                  id="settings-whatsapp"
+                  type="text"
+                  name="whatsapp"
+                  maxLength={100}
+                  placeholder="e.g. +201012345678 or https://wa.me/..."
+                  value={formData.whatsapp}
+                  onChange={handleChange}
+                  className="px-3.5 py-2 glass-input rounded-lg text-sm"
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="settings-phone" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Phone Number <span className="text-xs font-normal text-slate-500">(optional)</span>
+                </label>
+                <input
+                  id="settings-phone"
+                  type="tel"
+                  name="phone"
+                  maxLength={40}
+                  placeholder="e.g. +20 101 234 5678"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="px-3.5 py-2 glass-input rounded-lg text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-2">
+                <label htmlFor="settings-contactEmail" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Public Contact Email <span className="text-xs font-normal text-slate-500">(optional)</span>
+                </label>
+                <input
+                  id="settings-contactEmail"
+                  type="email"
+                  name="contactEmail"
+                  maxLength={255}
+                  placeholder="e.g. you@domain.com"
+                  value={formData.contactEmail}
+                  onChange={handleChange}
+                  className="px-3.5 py-2 glass-input rounded-lg text-sm"
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label htmlFor="settings-resumeUrl" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Resume / CV Link <span className="text-xs font-normal text-slate-500">(optional)</span>
+                </label>
+                <input
+                  id="settings-resumeUrl"
+                  type="url"
+                  name="resumeUrl"
+                  placeholder="https://drive.google.com/..."
+                  value={formData.resumeUrl}
+                  onChange={handleChange}
+                  className="px-3.5 py-2 glass-input rounded-lg text-sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2 pt-2 border-t border-slate-200/70 dark:border-white/[0.08]">
             <label htmlFor="settings-bio" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               Short Bio
             </label>
@@ -416,6 +604,7 @@ export default function SettingsPage() {
               onChange={(e) => setAbout(e.target.value)}
               rows="5"
               maxLength={1500}
+              placeholder="Share your engineering background, key systems you've architected, and what you enjoy building..."
               className="w-full glass-input rounded-lg p-3.5 text-sm resize-y"
             />
           </div>

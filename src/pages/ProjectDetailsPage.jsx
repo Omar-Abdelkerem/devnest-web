@@ -9,9 +9,11 @@ import {
   getStarCount,
   normalizeProjectLinks,
 } from '../lib/api'
+import { getSavedPinnedMap, savePinnedState } from '../lib/projectOrder'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import ImageLightbox from '../components/ImageLightbox'
+import ContactCTA from '../components/ContactCTA'
 
 export default function ProjectDetailsPage() {
   const { projectId } = useParams()
@@ -19,6 +21,7 @@ export default function ProjectDetailsPage() {
   const navigate = useNavigate()
 
   const [project, setProject] = useState(null)
+  const [authorProfile, setAuthorProfile] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState(null)
   const [activeTab, setActiveTab] = useState('readme')
@@ -26,6 +29,7 @@ export default function ProjectDetailsPage() {
   const [isStarred, setIsStarred] = useState(false)
   const [starCount, setStarCount] = useState(0)
   const [isTogglingStar, setIsTogglingStar] = useState(false)
+  const [isPinned, setIsPinned] = useState(false)
 
   const [comments, setComments] = useState([])
   const [newComment, setNewComment] = useState('')
@@ -57,6 +61,27 @@ export default function ProjectDetailsPage() {
           setProject(projData)
           setStarCount(getStarCount(projData))
           setIsStarred(Boolean(projData.hasStarred))
+
+          const { slug } = getProjectAuthor(projData)
+          const savedPins = getSavedPinnedMap(slug)
+          const pinnedStatus =
+            projData.id in savedPins
+              ? Boolean(savedPins[projData.id])
+              : Boolean(projData.isPinned)
+          setIsPinned(pinnedStatus)
+
+          // Fetch author public profile for full Contact CTA metadata
+          if (slug) {
+            apiFetch(`/api/v1/user/${encodeURIComponent(slug)}`)
+              .then(async (uRes) => {
+                if (!cancelled && uRes.ok) {
+                  const uData = await uRes.json()
+                  const fetchedUser = uData.user || uData.data?.user || uData.data || uData
+                  setAuthorProfile(fetchedUser)
+                }
+              })
+              .catch(() => {})
+          }
         } else {
           setError('Project not found, or you do not have permission to view it.')
           return
@@ -101,6 +126,23 @@ export default function ProjectDetailsPage() {
       setStarCount((prev) => (wasStarred ? prev + 1 : Math.max(0, prev - 1)))
     } finally {
       setIsTogglingStar(false)
+    }
+  }
+
+  const handleTogglePin = async () => {
+    if (!project) return
+    const { slug } = getProjectAuthor(project)
+    const nextPinned = !isPinned
+    setIsPinned(nextPinned)
+    savePinnedState(slug || user?.username, project.id, nextPinned)
+
+    try {
+      await apiFetch(`/api/v1/projects/${project.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ isPinned: nextPinned }),
+      })
+    } catch {
+      // Local pin state already saved
     }
   }
 
@@ -173,7 +215,7 @@ export default function ProjectDetailsPage() {
     )
   }
 
-  const { slug: authorSlug, name: authorName } = getProjectAuthor(project)
+  const { slug: authorSlug, name: authorName, avatar: authorAvatar } = getProjectAuthor(project)
   const authorTo = authorProfilePath(authorSlug)
   const isOwner =
     user &&
@@ -188,6 +230,15 @@ export default function ProjectDetailsPage() {
 
   const projectLinks = normalizeProjectLinks(project.links)
 
+  const developerContactData = {
+    ...(project.owner || project.user || {}),
+    ...(authorProfile || {}),
+    ...(isOwner && user ? user : {}),
+    handle: authorSlug || authorName || 'developer',
+    username: authorSlug || authorName || 'developer',
+    name: authorProfile?.name || authorName || authorSlug || 'developer',
+  }
+
   return (
     <div className="max-w-5xl mx-auto px-6 py-12 lg:py-16 w-full min-h-screen">
       <div className="mb-8">
@@ -195,7 +246,7 @@ export default function ProjectDetailsPage() {
           to={authorTo || '/explore'}
           className="text-sm font-mono text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
         >
-          ← Back
+          ← Back to {authorSlug ? `@${authorSlug}` : 'Explore'}
         </Link>
       </div>
 
@@ -206,7 +257,7 @@ export default function ProjectDetailsPage() {
             type="button"
             onClick={() => setIsLightboxOpen(true)}
             aria-label="Open full-size project cover image"
-            className="block mb-10 rounded-xl overflow-hidden border border-slate-200 dark:border-white/[0.08] shadow-sm aspect-[16/9] max-h-[440px] w-full bg-slate-100 dark:bg-[#0d0f16] cursor-zoom-in group"
+            className="block mb-10 rounded-2xl overflow-hidden border border-slate-200 dark:border-white/[0.08] shadow-sm aspect-[16/9] max-h-[440px] w-full bg-slate-100 dark:bg-[#0d0f16] cursor-zoom-in group"
           >
             <img
               src={project.projectimgUrl}
@@ -226,10 +277,15 @@ export default function ProjectDetailsPage() {
 
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 pb-10 border-b border-slate-200/80 dark:border-white/[0.08]">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3.5 mb-3 flex-wrap">
+          <div className="flex items-center gap-3 mb-3 flex-wrap">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight break-words">
               {project.title || project.name || 'Untitled Project'}
             </h1>
+            {isPinned && (
+              <span className="px-2.5 py-0.5 text-xs font-mono bg-accent/15 text-accent dark:text-accent-light border border-accent/30 rounded-full uppercase tracking-wider font-bold shrink-0">
+                ★ Pinned
+              </span>
+            )}
             {!project.isPublic && (
               <span className="px-2.5 py-0.5 text-xs font-mono bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/[0.1] rounded uppercase tracking-wider font-bold shrink-0">
                 Private
@@ -273,7 +329,7 @@ export default function ProjectDetailsPage() {
           )}
         </div>
 
-        <div className="flex flex-row md:flex-col gap-2.5 shrink-0">
+        <div className="flex flex-wrap md:flex-col gap-2.5 shrink-0">
           <button
             type="button"
             onClick={handleToggleStar}
@@ -286,12 +342,23 @@ export default function ProjectDetailsPage() {
           </button>
 
           {isOwner && (
-            <Link
-              to={`/project/${project.id}/edit`}
-              className="btn-glass-pill px-5 py-2 rounded-lg text-sm font-semibold text-center"
-            >
-              Edit Project
-            </Link>
+            <>
+              <button
+                type="button"
+                onClick={handleTogglePin}
+                className={`px-5 py-2 rounded-lg text-sm font-semibold cursor-pointer ${
+                  isPinned ? 'btn-3d-pill' : 'btn-glass-pill'
+                }`}
+              >
+                {isPinned ? '★ Pinned to Top' : '☆ Pin to Top'}
+              </button>
+              <Link
+                to={`/project/${project.id}/edit`}
+                className="btn-glass-pill px-5 py-2 rounded-lg text-sm font-semibold text-center"
+              >
+                Edit Project
+              </Link>
+            </>
           )}
         </div>
       </div>
@@ -458,9 +525,62 @@ export default function ProjectDetailsPage() {
               </div>
             )}
           </div>
+
+          {/* Direct Reach Out / Hiring CTA Banner on Every Project Page */}
+          <div className="mt-4">
+            <ContactCTA
+              developer={developerContactData}
+              isOwner={Boolean(isOwner)}
+              projectTitle={project.title || project.name || 'this project'}
+              variant="project"
+            />
+          </div>
         </div>
 
         <aside className="flex flex-col gap-6 min-w-0">
+          {/* Author Mini-Portfolio Card */}
+          <div className="glass-panel p-5 rounded-xl flex flex-col gap-4">
+            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
+              Creator
+            </span>
+            <Link
+              to={authorTo || '/explore'}
+              className="flex items-center gap-3 group"
+            >
+              <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-200 dark:bg-white/[0.08] flex items-center justify-center border border-slate-300 dark:border-white/[0.12] shrink-0">
+                {authorAvatar || developerContactData.avatarUrl ? (
+                  <img
+                    src={authorAvatar || developerContactData.avatarUrl}
+                    alt={`${authorSlug || 'Developer'} avatar`}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                    {(authorSlug || 'D').charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div className="min-w-0">
+                <div className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-accent dark:group-hover:text-accent-light transition-colors truncate">
+                  @{authorSlug || authorName || 'developer'}
+                </div>
+                {(developerContactData.headline || developerContactData.role) && (
+                  <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                    {developerContactData.headline || developerContactData.role}
+                  </div>
+                )}
+              </div>
+            </Link>
+            {authorTo && (
+              <Link
+                to={authorTo}
+                className="btn-glass-pill w-full py-2 px-3 rounded-lg text-xs font-mono font-semibold text-center"
+              >
+                View full portfolio →
+              </Link>
+            )}
+          </div>
+
           <div className="glass-panel p-5 rounded-xl flex flex-col gap-5">
             <div>
               <span className="text-xs font-mono font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3 block">

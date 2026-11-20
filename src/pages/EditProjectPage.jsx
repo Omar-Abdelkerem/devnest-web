@@ -3,6 +3,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { apiFetch, normalizeProjectLinks, parseApiError, safeExternalUrl } from '../lib/api'
+import { getSavedPinnedMap, savePinnedState } from '../lib/projectOrder'
 
 export default function EditProjectPage() {
   useDocumentTitle('Edit Project')
@@ -18,6 +19,7 @@ export default function EditProjectPage() {
     languages: '',
     projectimgUrl: '',
     isPublic: true,
+    isPinned: false,
   })
   const [links, setLinks] = useState([])
   const [linkName, setLinkName] = useState('')
@@ -47,6 +49,12 @@ export default function EditProjectPage() {
             return
           }
 
+          const savedPins = getSavedPinnedMap(user?.username)
+          const effectivePinned =
+            project.id in savedPins
+              ? Boolean(savedPins[project.id])
+              : Boolean(project.isPinned)
+
           setFormData({
             title: project.title || project.name || '',
             description: project.description || '',
@@ -54,6 +62,7 @@ export default function EditProjectPage() {
             languages: Array.isArray(project.languages) ? project.languages.join(', ') : '',
             projectimgUrl: project.projectimgUrl || '',
             isPublic: project.isPublic !== undefined ? project.isPublic : true,
+            isPinned: effectivePinned,
           })
           setLinks(normalizeProjectLinks(project.links))
         } else {
@@ -142,6 +151,8 @@ export default function EditProjectPage() {
         .map((lang) => lang.trim())
         .filter(Boolean)
 
+      savePinnedState(user?.username, projectId, formData.isPinned)
+
       const response = await apiFetch(`/api/v1/projects/${projectId}`, {
         method: 'PATCH',
         body: JSON.stringify({
@@ -152,6 +163,7 @@ export default function EditProjectPage() {
           projectimgUrl: formData.projectimgUrl || null,
           links,
           isPublic: formData.isPublic,
+          isPinned: formData.isPinned,
         }),
       })
 
@@ -384,16 +396,27 @@ export default function EditProjectPage() {
           />
         </div>
 
-        <div className="flex items-center gap-3 pt-1">
-          <input
-            id="edit-public"
-            type="checkbox"
-            checked={formData.isPublic}
-            onChange={(e) => setFormData({ ...formData, isPublic: e.target.checked })}
-            className="w-4 h-4 accent-accent rounded cursor-pointer"
-          />
-          <label htmlFor="edit-public" className="text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+        <div className="flex flex-wrap items-center gap-6 pt-1">
+          <label htmlFor="edit-public" className="flex items-center gap-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+            <input
+              id="edit-public"
+              type="checkbox"
+              checked={formData.isPublic}
+              onChange={(e) => setFormData({ ...formData, isPublic: e.target.checked })}
+              className="w-4 h-4 accent-accent rounded cursor-pointer"
+            />
             Make this project public
+          </label>
+
+          <label htmlFor="edit-pinned" className="flex items-center gap-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+            <input
+              id="edit-pinned"
+              type="checkbox"
+              checked={formData.isPinned}
+              onChange={(e) => setFormData({ ...formData, isPinned: e.target.checked })}
+              className="w-4 h-4 accent-accent rounded cursor-pointer"
+            />
+            Pin to top of my portfolio
           </label>
         </div>
 

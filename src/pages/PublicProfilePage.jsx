@@ -5,9 +5,12 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import ProfileSidebar from '../components/ProfileSidebar'
 import ProfileTabs from '../components/ProfileTabs'
 import ProjectGrid from '../components/ProjectGrid'
+import PortfolioHighlights from '../components/PortfolioHighlights'
+import ContactCTA from '../components/ContactCTA'
 import VolumetricBackground from '../components/VolumetricBackground'
 import GlassIconTile from '../components/GlassIconTile'
 import { apiFetch, getStarCount, parseApiError } from '../lib/api'
+import { sortProjectsWithOrder } from '../lib/projectOrder'
 
 export default function PublicProfilePage() {
   const { username } = useParams()
@@ -170,12 +173,20 @@ export default function PublicProfilePage() {
     return {
       name: profileUser.name || handle,
       handle,
+      headline: profileUser.headline,
       bio: profileUser.bio,
       about: profileUser.about,
       location: profileUser.location,
       age: profileUser.age,
       role: profileUser.role,
       company: profileUser.company,
+      education: profileUser.education,
+      yearsOfExperience: profileUser.yearsOfExperience,
+      workPreferences: profileUser.workPreferences,
+      phone: profileUser.phone,
+      whatsapp: profileUser.whatsapp,
+      contactEmail: profileUser.contactEmail,
+      resumeUrl: profileUser.resumeUrl,
       availableForWork: profileUser.availableForWork,
       joinedYear: profileUser.createdAt ? new Date(profileUser.createdAt).getFullYear() : null,
       avatarUrl: profileUser.avatarUrl,
@@ -186,39 +197,41 @@ export default function PublicProfilePage() {
     }
   }, [profileUser, skills, handle])
 
-  const mappedProjects = useMemo(
-    () =>
-      projects
-        .filter(Boolean)
-        .map((p) => ({
-          id: p.id,
-          repo: p.title || p.name || 'Untitled Project',
-          description: p.description || '',
-          projectimgUrl: p.projectimgUrl || null,
-          links: p.links || [],
-          badges: p.isPublic === false ? ['PRIVATE'] : [],
-          languages: p.languages || (p.language ? [{ name: p.language }] : []),
-          language:
-            p.language ||
-            (p.languages?.length > 0
-              ? typeof p.languages[0] === 'string'
-                ? p.languages[0]
-                : p.languages[0].name
-              : null) ||
-            'Code',
-          languageColor: p.languageColor || '#38b2a3',
-          stars: getStarCount(p),
-          _count: p._count,
-          updatedAt: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'Recently',
-          author: handle,
-          authorUsername: handle,
-          authorHandle: handle,
-          authorAvatar: profileUser?.avatarUrl,
-          owner: { username: handle, avatarUrl: profileUser?.avatarUrl },
-          user: { username: handle, avatarUrl: profileUser?.avatarUrl },
-        })),
-    [projects, handle, profileUser],
-  )
+  const mappedProjects = useMemo(() => {
+    const rawMapped = projects
+      .filter(Boolean)
+      .map((p) => ({
+        id: p.id,
+        repo: p.title || p.name || 'Untitled Project',
+        description: p.description || '',
+        projectimgUrl: p.projectimgUrl || null,
+        links: p.links || [],
+        isPinned: Boolean(p.isPinned),
+        sortOrder: typeof p.sortOrder === 'number' ? p.sortOrder : 0,
+        badges: p.isPublic === false ? ['PRIVATE'] : [],
+        languages: p.languages || (p.language ? [{ name: p.language }] : []),
+        language:
+          p.language ||
+          (p.languages?.length > 0
+            ? typeof p.languages[0] === 'string'
+              ? p.languages[0]
+              : p.languages[0].name
+            : null) ||
+          'Code',
+        languageColor: p.languageColor || '#38b2a3',
+        stars: getStarCount(p),
+        _count: p._count,
+        updatedAt: p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : 'Recently',
+        author: handle,
+        authorUsername: handle,
+        authorHandle: handle,
+        authorAvatar: profileUser?.avatarUrl,
+        owner: { username: handle, avatarUrl: profileUser?.avatarUrl },
+        user: { username: handle, avatarUrl: profileUser?.avatarUrl },
+      }))
+
+    return sortProjectsWithOrder(rawMapped, handle)
+  }, [projects, handle, profileUser])
 
   if (isLoading) {
     return (
@@ -277,7 +290,10 @@ export default function PublicProfilePage() {
           totalStars={totalStars}
         />
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 flex flex-col">
+          {/* Portfolio Overview & Stack Highlights */}
+          <PortfolioHighlights user={profileData} projects={mappedProjects} />
+
           <div className="pb-5 mb-6 border-b border-slate-200/80 dark:border-white/[0.08]">
             <ProfileTabs
               projectCount={mappedProjects.length}
@@ -288,7 +304,7 @@ export default function PublicProfilePage() {
 
           {activeTab === 'projects' &&
             (mappedProjects.length > 0 ? (
-              <div className="mt-6">
+              <div className="mt-2">
                 <ProjectGrid projects={mappedProjects} />
               </div>
             ) : (
@@ -412,6 +428,16 @@ export default function PublicProfilePage() {
               )}
             </div>
           )}
+
+          {/* Direct Reach Out / Hiring CTA Banner on Public Profile Page */}
+          <div className="mt-10 pt-2">
+            <ContactCTA
+              developer={profileData}
+              isOwner={Boolean(isOwnProfile)}
+              variant="profile"
+              onLeaveFeedback={() => setActiveTab('feedback')}
+            />
+          </div>
         </div>
       </div>
     </div>
