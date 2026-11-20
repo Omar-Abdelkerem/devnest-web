@@ -33,7 +33,11 @@ export default function SignInPage() {
         setUser(loggedInUser)
         navigate(loggedInUser?.username ? `/${loggedInUser.username}` : '/', { replace: true })
       } else {
-        const { message } = await parseApiError(response, 'Invalid email or password.')
+        const fallback =
+          response.status === 401
+            ? 'Invalid email or password.'
+            : `Sign in failed (HTTP ${response.status}).`
+        const { message } = await parseApiError(response, fallback)
         setError(message)
       }
     } catch {

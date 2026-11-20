@@ -139,6 +139,18 @@ async function parseApiError(response, fallback = 'Something went wrong. Please 
     const fields = Array.isArray(data?.error?.fields) ? data.error.fields : []
     return { message, fields }
   } catch {
+    if (response.status === 405 || response.status === 404) {
+      return {
+        message: `API endpoint unreachable (HTTP ${response.status}). Check that the backend is running and VITE_API_URL is configured.`,
+        fields: [],
+      }
+    }
+    if (response.status >= 500) {
+      return {
+        message: `Server error (HTTP ${response.status}). Please try again in a moment.`,
+        fields: [],
+      }
+    }
     return { message: fallback, fields: [] }
   }
 }
