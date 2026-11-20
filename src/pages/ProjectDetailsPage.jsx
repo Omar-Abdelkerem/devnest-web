@@ -363,8 +363,8 @@ export default function ProjectDetailsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pt-8 w-full">
-        <div className="md:col-span-3 flex flex-col gap-6 min-w-0">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-10 pt-8 w-full">
+        <div className="lg:col-span-3 flex flex-col gap-6 min-w-0">
           <div className="flex gap-6 border-b border-slate-200/80 dark:border-white/[0.08]" role="tablist">
             <button
               type="button"

@@ -187,6 +187,7 @@ export default function PublicProfilePage() {
       whatsapp: profileUser.whatsapp,
       contactEmail: profileUser.contactEmail,
       resumeUrl: profileUser.resumeUrl,
+      ctaMessage: profileUser.ctaMessage,
       availableForWork: profileUser.availableForWork,
       joinedYear: profileUser.createdAt ? new Date(profileUser.createdAt).getFullYear() : null,
       avatarUrl: profileUser.avatarUrl,
@@ -293,6 +294,16 @@ export default function PublicProfilePage() {
         <div className="flex-1 min-w-0 flex flex-col">
           {/* Portfolio Overview & Stack Highlights */}
           <PortfolioHighlights user={profileData} projects={mappedProjects} />
+
+          {/* Prominent Direct Reach Out / Hiring CTA Banner */}
+          <div className="mb-6">
+            <ContactCTA
+              developer={profileData}
+              isOwner={Boolean(isOwnProfile)}
+              variant="profile"
+              onLeaveFeedback={() => setActiveTab('feedback')}
+            />
+          </div>
 
           <div className="pb-5 mb-6 border-b border-slate-200/80 dark:border-white/[0.08]">
             <ProfileTabs
@@ -428,16 +439,6 @@ export default function PublicProfilePage() {
               )}
             </div>
           )}
-
-          {/* Direct Reach Out / Hiring CTA Banner on Public Profile Page */}
-          <div className="mt-10 pt-2">
-            <ContactCTA
-              developer={profileData}
-              isOwner={Boolean(isOwnProfile)}
-              variant="profile"
-              onLeaveFeedback={() => setActiveTab('feedback')}
-            />
-          </div>
         </div>
       </div>
     </div>

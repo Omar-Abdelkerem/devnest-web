@@ -45,11 +45,11 @@ export default function PortfolioHighlights({ user = {}, projects = [] }) {
     <div className="glass-panel rounded-2xl p-4 sm:p-5 mb-6">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-200/70 dark:divide-white/[0.07]">
         {/* Column 1: Engineering Focus & Experience */}
-        <div className="flex flex-col justify-between pr-2">
+        <div className="flex flex-col justify-between sm:pr-3 min-w-0">
           <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-slate-500">
             Engineering Focus
           </span>
-          <div className="mt-1.5">
+          <div className="mt-1.5 min-w-0">
             <div className="text-sm font-bold text-slate-900 dark:text-white truncate">
               {user?.headline ||
                 (user?.role
@@ -65,7 +65,7 @@ export default function PortfolioHighlights({ user = {}, projects = [] }) {
                   </span>
                 )}
               {user?.education && (
-                <span className="truncate max-w-[200px]" title={user.education}>
+                <span className="truncate max-w-full" title={user.education}>
                   · {user.education}
                 </span>
               )}
@@ -74,7 +74,7 @@ export default function PortfolioHighlights({ user = {}, projects = [] }) {
         </div>
 
         {/* Column 2: Top Stack Across Projects */}
-        <div className="pt-3 sm:pt-0 sm:px-4 flex flex-col justify-between">
+        <div className="pt-3 sm:pt-0 sm:px-4 flex flex-col justify-between min-w-0">
           <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-slate-500">
             Primary Stack
           </span>
@@ -98,7 +98,7 @@ export default function PortfolioHighlights({ user = {}, projects = [] }) {
         </div>
 
         {/* Column 3: Portfolio Status & Availability */}
-        <div className="pt-3 sm:pt-0 sm:pl-4 flex flex-col justify-between">
+        <div className="pt-3 sm:pt-0 sm:pl-4 flex flex-col justify-between min-w-0">
           <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-slate-500">
             Status &amp; Availability
           </span>

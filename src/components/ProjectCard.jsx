@@ -96,10 +96,8 @@ export default function ProjectCard({
       whileHover={{ y: isReordering ? 0 : -5 }}
       transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
       className={`glass-panel-interactive rounded-2xl overflow-hidden flex flex-col group h-full p-2.5 ${
-        isPinned
-          ? 'ring-1 ring-accent/35 dark:ring-accent-light/30'
-          : ''
-      } ${isReordering ? 'ring-2 ring-accent/50 dark:ring-accent-light/50' : ''}`}
+        isPinned ? 'ring-1 ring-accent/35 dark:ring-accent-light/30' : ''
+      } ${isReordering ? 'ring-2 ring-accent/55 dark:ring-accent-light/55' : ''}`}
     >
       {/* Top specular highlight beam on hover */}
       <div
@@ -107,36 +105,14 @@ export default function ProjectCard({
         className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-accent-light/65 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
       />
 
-      {/* Owner Reorder & Pin Control Bar (always visible in Rearrange mode, or on hover for owner) */}
-      {isOwner && (onMoveUp || onMoveDown || onTogglePin) && (
-        <div
-          className={`relative z-20 flex items-center justify-between gap-2 px-2.5 py-1.5 mb-2 rounded-xl bg-slate-100/90 dark:bg-white/[0.06] border border-slate-200/80 dark:border-white/[0.1] text-xs font-mono transition-all ${
-            isReordering ? 'flex' : 'hidden group-hover:flex'
-          }`}
-        >
-          {onTogglePin && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                onTogglePin(project.id)
-              }}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
-                isPinned
-                  ? 'bg-accent text-white shadow-sm'
-                  : 'bg-white/80 dark:bg-white/[0.06] text-slate-700 dark:text-slate-200 hover:text-accent dark:hover:text-accent-light border border-slate-200 dark:border-white/[0.1]'
-              }`}
-              title={isPinned ? 'Unpin from top' : 'Pin project to top of portfolio'}
-            >
-              <svg className="w-3.5 h-3.5" fill={isPinned ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-              </svg>
-              <span>{isPinned ? 'Pinned to top' : 'Pin to top'}</span>
-            </button>
-          )}
+      {/* Rearrange Controls — ONLY shown when the user explicitly clicks "Rearrange" */}
+      {isOwner && isReordering && (onMoveUp || onMoveDown) && (
+        <div className="relative z-20 flex items-center justify-between gap-2 px-2.5 py-1.5 mb-2 rounded-xl bg-slate-100/95 dark:bg-white/[0.06] border border-accent/30 text-xs font-mono">
+          <span className="text-[11px] text-slate-600 dark:text-slate-300 truncate">
+            Move position
+          </span>
 
-          <div className="flex items-center gap-1.5 ml-auto">
+          <div className="flex items-center gap-1.5 shrink-0">
             {onMoveUp && (
               <button
                 type="button"
@@ -148,7 +124,7 @@ export default function ProjectCard({
                 }}
                 title="Move project earlier"
                 aria-label={`Move ${projectTitle} up`}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white/80 dark:bg-white/[0.06] hover:bg-accent hover:text-white text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/[0.1] disabled:opacity-35 disabled:pointer-events-none transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white dark:bg-white/[0.07] hover:bg-accent hover:text-white text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/[0.1] disabled:opacity-35 disabled:pointer-events-none transition-colors cursor-pointer"
               >
                 <span>↑</span>
                 <span className="text-[10px]">Up</span>
@@ -165,7 +141,7 @@ export default function ProjectCard({
                 }}
                 title="Move project later"
                 aria-label={`Move ${projectTitle} down`}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white/80 dark:bg-white/[0.06] hover:bg-accent hover:text-white text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/[0.1] disabled:opacity-35 disabled:pointer-events-none transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white dark:bg-white/[0.07] hover:bg-accent hover:text-white text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/[0.1] disabled:opacity-35 disabled:pointer-events-none transition-colors cursor-pointer"
               >
                 <span>↓</span>
                 <span className="text-[10px]">Down</span>
@@ -277,8 +253,8 @@ export default function ProjectCard({
 
       {/* Card Body */}
       <div className="flex flex-col flex-1 px-3 pt-4 pb-2.5">
-        <div className="flex items-start justify-between gap-3 mb-1.5">
-          <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white group-hover:text-accent dark:group-hover:text-accent-light transition-colors truncate">
+        <div className="flex items-start justify-between gap-2.5 mb-1.5">
+          <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white group-hover:text-accent dark:group-hover:text-accent-light transition-colors truncate min-w-0">
             <Link
               to={`/project/${project.id}`}
               title={projectTitle}
@@ -288,9 +264,46 @@ export default function ProjectCard({
             </Link>
           </h3>
 
-          <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 shrink-0 mt-1">
-            {project.updatedAt}
-          </span>
+          <div className="flex items-center gap-2 shrink-0 relative z-20">
+            <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500">
+              {project.updatedAt}
+            </span>
+
+            {/* Small Always-Shown Pin Icon Button for Owner */}
+            {isOwner && onTogglePin && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  onTogglePin(project.id)
+                }}
+                title={isPinned ? 'Unpin from top' : 'Pin to top of portfolio'}
+                aria-label={isPinned ? `Unpin ${projectTitle}` : `Pin ${projectTitle} to top`}
+                aria-pressed={isPinned}
+                className={`w-7 h-7 rounded-lg inline-flex items-center justify-center border transition-all cursor-pointer ${
+                  isPinned
+                    ? 'bg-accent/20 text-accent dark:text-accent-light border-accent/45 shadow-sm'
+                    : 'bg-slate-100/90 dark:bg-white/[0.05] text-slate-400 hover:text-accent dark:hover:text-accent-light border-slate-200/80 dark:border-white/[0.1] hover:border-accent/40'
+                }`}
+              >
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill={isPinned ? 'currentColor' : 'none'}
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
 
         {uploadError && (

@@ -28,6 +28,7 @@ export default function SettingsPage() {
     whatsapp: user?.whatsapp || '',
     contactEmail: user?.contactEmail || '',
     resumeUrl: user?.resumeUrl || '',
+    ctaMessage: user?.ctaMessage || '',
     availableForWork: Boolean(user?.availableForWork),
     isPublic: user?.isPublic !== undefined ? Boolean(user.isPublic) : true,
   }))
@@ -176,6 +177,7 @@ export default function SettingsPage() {
         whatsapp: formData.whatsapp.trim(),
         contactEmail: formData.contactEmail.trim(),
         resumeUrl: normalizedResume,
+        ctaMessage: formData.ctaMessage.trim(),
         availableForWork: formData.availableForWork,
         isPublic: formData.isPublic,
         links,
@@ -503,8 +505,27 @@ export default function SettingsPage() {
                 Direct Contact &amp; Hiring CTA
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                Displayed on your profile and project pages so recruiters, clients, and collaborators can reach you in one click.
+                Displayed prominently on your profile and every project page so recruiters, clients, and collaborators can reach you in one click.
               </p>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="settings-ctaMessage" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Custom CTA Sentence <span className="text-xs font-normal text-slate-500">(optional)</span>
+              </label>
+              <textarea
+                id="settings-ctaMessage"
+                name="ctaMessage"
+                rows="2"
+                maxLength={240}
+                placeholder="e.g. Available for backend engineering roles & freelance MVPs — message me on WhatsApp or email to build together."
+                value={formData.ctaMessage}
+                onChange={handleChange}
+                className="px-3.5 py-2 glass-input rounded-lg text-sm resize-none"
+              />
+              <div className="text-xs text-slate-500 text-right font-mono">
+                {(formData.ctaMessage || '').length}/240
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

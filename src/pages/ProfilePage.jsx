@@ -112,6 +112,7 @@ export default function ProfilePage() {
       whatsapp: user?.whatsapp,
       contactEmail: user?.contactEmail || user?.email,
       resumeUrl: user?.resumeUrl,
+      ctaMessage: user?.ctaMessage,
       availableForWork: user?.availableForWork,
       avatarUrl: user?.avatarUrl,
       links: user?.links || [],
@@ -260,6 +261,15 @@ export default function ProfilePage() {
         <div className="flex-1 min-w-0 flex flex-col">
           {/* Portfolio Overview & Stack Highlights */}
           <PortfolioHighlights user={profileData} projects={mappedProjects} />
+
+          {/* Prominent Direct Reach Out / Hiring CTA Banner */}
+          <div className="mb-6">
+            <ContactCTA
+              developer={profileData}
+              isOwner={true}
+              variant="profile"
+            />
+          </div>
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 mb-6 border-b border-slate-200/80 dark:border-white/[0.08]">
             <ProfileTabs
@@ -446,15 +456,6 @@ export default function ProfilePage() {
               )}
             </div>
           )}
-
-          {/* Direct Reach Out / Hiring CTA Banner on Profile Page */}
-          <div className="mt-10 pt-4">
-            <ContactCTA
-              developer={profileData}
-              isOwner={true}
-              variant="profile"
-            />
-          </div>
         </div>
       </div>
     </div>
