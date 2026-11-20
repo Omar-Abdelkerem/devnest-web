@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { motion } from 'motion/react'
 import { apiFetch, getStarCount, normalizeProjectLinks, parseApiError } from '../lib/api'
 
 export default function ProjectCard({
@@ -65,7 +66,15 @@ export default function ProjectCard({
   }
 
   return (
-    <article className="project-card-interactive flex flex-col bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-neutral-800 rounded-xl overflow-hidden hover:border-gray-300 dark:hover:border-neutral-600 shadow-sm group h-full">
+    <motion.article
+      initial={{ opacity: 0, y: 14 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.12 }}
+      whileHover={{ y: -4 }}
+      whileTap={{ scale: 0.99 }}
+      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+      className="relative flex flex-col bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-neutral-800 rounded-xl overflow-hidden hover:border-gray-300 dark:hover:border-neutral-600 shadow-sm hover:shadow-lg transition-[border-color,box-shadow] duration-200 group h-full"
+    >
       {/* Hidden file input for owner quick cover upload */}
       {isOwner && project.id && (
         <input
@@ -239,6 +248,10 @@ export default function ProjectCard({
           )}
 
           <div className="flex items-center gap-3 text-xs font-mono text-gray-500 dark:text-gray-400 ml-auto">
+            <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-200">
+              View details
+              <span className="inline-block rtl:rotate-180" aria-hidden="true">→</span>
+            </span>
             <span className="flex items-center gap-1">
               <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
@@ -248,6 +261,6 @@ export default function ProjectCard({
           </div>
         </div>
       </div>
-    </article>
+    </motion.article>
   )
 }

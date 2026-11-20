@@ -11,6 +11,7 @@ import {
 } from '../lib/api'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import ImageLightbox from '../components/ImageLightbox'
 
 export default function ProjectDetailsPage() {
   const { projectId } = useParams()
@@ -30,6 +31,7 @@ export default function ProjectDetailsPage() {
   const [newComment, setNewComment] = useState('')
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
   const [commentError, setCommentError] = useState('')
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false)
 
   useDocumentTitle(
     project?.title || 'Project Details',
@@ -197,16 +199,29 @@ export default function ProjectDetailsPage() {
         </Link>
       </div>
 
-      {/* Optional Project Cover Banner */}
+      {/* Optional Project Cover Banner — click to open full-screen Lightbox */}
       {project.projectimgUrl && (
-        <div className="animate-fade-up mb-10 rounded-2xl overflow-hidden border border-gray-200 dark:border-neutral-800 shadow-md aspect-[16/9] max-h-[440px] w-full bg-gray-100 dark:bg-neutral-900">
-          <img
+        <>
+          <button
+            type="button"
+            onClick={() => setIsLightboxOpen(true)}
+            aria-label="Open full-size project cover image"
+            className="block mb-10 rounded-xl overflow-hidden border border-gray-200 dark:border-neutral-800 shadow-sm aspect-[16/9] max-h-[440px] w-full bg-gray-100 dark:bg-neutral-900 cursor-zoom-in group"
+          >
+            <img
+              src={project.projectimgUrl}
+              alt={`${project.title || 'Project'} cover`}
+              fetchPriority="high"
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            />
+          </button>
+          <ImageLightbox
             src={project.projectimgUrl}
             alt={`${project.title || 'Project'} cover`}
-            fetchPriority="high"
-            className="w-full h-full object-cover"
+            isOpen={isLightboxOpen}
+            onClose={() => setIsLightboxOpen(false)}
           />
-        </div>
+        </>
       )}
 
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 pb-10 border-b border-gray-200 dark:border-neutral-800">

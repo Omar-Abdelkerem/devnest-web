@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react'
 import { safeExternalUrl } from '../lib/api'
+import AnimatedCounter from './AnimatedCounter'
 
 export default function ProfileSidebar({
   user,
@@ -10,36 +11,9 @@ export default function ProfileSidebar({
   totalStars = 0,
 }) {
   const hasAvatar = !!user?.avatarUrl
-  const avatarWrapRef = useRef(null)
-
-  // Subtle, clean scroll-linked scale on the sticky profile avatar (passive + rAF)
-  useEffect(() => {
-    const prefersReduced =
-      typeof window !== 'undefined' &&
-      window.matchMedia &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (prefersReduced) return
-
-    let ticking = false
-    const update = () => {
-      ticking = false
-      const el = avatarWrapRef.current
-      if (!el) return
-      const progress = Math.min(window.scrollY || 0, 360) / 360
-      const scale = 1 - progress * 0.06 // subtle 1.00 -> 0.94
-      el.style.transform = `scale(${scale.toFixed(3)})`
-    }
-
-    const onScroll = () => {
-      if (!ticking) {
-        ticking = true
-        window.requestAnimationFrame(update)
-      }
-    }
-
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  const prefersReduced = useReducedMotion()
+  const { scrollY } = useScroll()
+  const avatarScale = useTransform(scrollY, [0, 360], [1, prefersReduced ? 1 : 0.94])
 
   const hasMeta =
     user?.role ||
@@ -49,11 +23,16 @@ export default function ProfileSidebar({
     user?.joinedYear
 
   return (
-    <aside className="flex flex-col gap-6 w-full lg:w-80 shrink-0 mb-8 lg:mb-0 lg:sticky lg:top-20 lg:self-start">
-      {/* Clean Profile Image */}
-      <div
-        ref={avatarWrapRef}
-        className={`relative w-full aspect-square max-w-[300px] mx-auto lg:mx-0 rounded-2xl flex items-center justify-center overflow-hidden shadow-sm transition-transform duration-200 ease-out origin-top will-change-transform ${
+    <motion.aside
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      className="flex flex-col gap-6 w-full lg:w-80 shrink-0 mb-8 lg:mb-0 lg:sticky lg:top-20 lg:self-start"
+    >
+      {/* Clean Profile Image with subtle Framer Motion scroll scale */}
+      <motion.div
+        style={{ scale: avatarScale }}
+        className={`relative w-full aspect-square max-w-[300px] mx-auto lg:mx-0 rounded-2xl flex items-center justify-center overflow-hidden shadow-sm origin-top will-change-transform ${
           !hasAvatar && isEmpty
             ? 'border border-dashed border-gray-300 dark:border-neutral-700 bg-transparent'
             : 'bg-gray-100 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-800'
@@ -86,7 +65,7 @@ export default function ProfileSidebar({
             Open to work
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* Name, Handle & Edit CTA */}
       <div className="flex flex-col gap-3 text-center lg:text-left">
@@ -99,15 +78,19 @@ export default function ProfileSidebar({
           </p>
         </div>
 
-        {/* Clean Stats Row */}
+        {/* Clean Stats Row with Animated Counters */}
         <div className="flex items-center justify-center lg:justify-start gap-4 text-xs font-mono text-gray-600 dark:text-gray-400">
           <span>
-            <strong className="text-gray-900 dark:text-white font-semibold">{projectCount}</strong>{' '}
+            <strong className="text-gray-900 dark:text-white font-semibold">
+              <AnimatedCounter value={projectCount} />
+            </strong>{' '}
             {projectCount === 1 ? 'project' : 'projects'}
           </span>
           <span className="text-gray-300 dark:text-neutral-700">·</span>
           <span>
-            <strong className="text-gray-900 dark:text-white font-semibold">★ {totalStars}</strong>{' '}
+            <strong className="text-gray-900 dark:text-white font-semibold">
+              ★ <AnimatedCounter value={totalStars} />
+            </strong>{' '}
             {totalStars === 1 ? 'star' : 'stars'}
           </span>
         </div>
@@ -259,6 +242,6 @@ export default function ProfileSidebar({
           </p>
         )}
       </div>
-    </aside>
+    </motion.aside>
   )
 }
